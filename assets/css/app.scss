@@ -1,0 +1,26 @@
+$brand-primary: darken(#428bca, 20%);
+
+#welcome{
+  font-size: 56px !important;
+}
+#update_order_history,
+#update_balances,
+#update_currency{
+  margin-top: 10px;
+}
+
+
+#filter_addDate_value>div:first-child{
+  width: 50%;
+  float: left;
+}
+
+
+.sum_title{
+  float: right;
+  margin-left: 20px;
+  padding: 10px;
+  h3{
+    margin-top: 0;
+  }
+}

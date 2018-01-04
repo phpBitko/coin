@@ -1,0 +1,30 @@
+{% extends 'SonataAdminBundle:CRUD:list.html.twig' %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('build/app.js') }}"></script>
+    <script src="{{ asset('bundles/fosjsrouting/js/router.js') }}"></script>
+    <script src="{{ path('fos_js_routing_js', { callback: 'fos.Router.setData' }) }}"></script>
+{% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('build/app.css') }}">
+{% endblock %}
+
+{% block tab_menu %}
+    {{ parent() }}
+    <button id='update_order_history' type="button" class="btn btn-success">Оновити історію ордерів</button>
+    <div class="sum_title">
+        <p>Сума в {{ data.currency}}</p>
+        <h3>{{ data.price }}</h3>
+    </div>
+    <div class="sum_title">
+        <p>Сума в доларах</p>
+        <h3>{{ data.priceUsd }}</h3>
+    </div>
+    <div class="sum_title">
+        <p>Залишок монет</p>
+        <h3>{{ data.quantity }}</h3>
+    </div>
+{% endblock %}
+

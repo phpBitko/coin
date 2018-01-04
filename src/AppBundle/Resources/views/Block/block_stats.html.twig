@@ -1,0 +1,16 @@
+<div id="cms-block-{{ block.id }}"
+     class="cms-block cms-block-element col-md-3">
+    <div class="small-box {{ settings.css_class }}">
+        <div class="inner">
+            <p>{{ settings.title }}</p>
+            {% for one in count %}
+                <li>{{ one.priceUsd}}</li>
+            {% endfor %}
+           {# <h3>d{{ count }}</h3>#}
+
+        </div>
+        <div class="icon">
+            <i class="fa {{ settings.icon }}"></i>
+        </div>
+    </div>
+</div>
