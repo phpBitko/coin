@@ -13,5 +13,17 @@
 
 {% block tab_menu %}
     <button id = 'update_balances' type="button"  class="btn btn-success">Оновити баланс</button>
+    <div class="sum_title">
+        <p>Різниця з попереднім, $</p>
+        <h3>{{ data.profit}}</h3>
+    </div>
+    <div class="sum_title">
+        <p>Сума, BTC </p>
+        <h3>{{ data.priceBtc}}</h3>
+    </div>
+     <div class="sum_title">
+        <p>Сума, $</p>
+        <h3>{{ data.priceUsd|round(2) }}</h3>
+    </div>
 {% endblock %}
 

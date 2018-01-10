@@ -39,7 +39,6 @@ class OrderHistoryCRUDController extends Controller
 	}
 
 	public function preList(Request $request) {
-		dump($this->admin->getDatagrid());
 		//$request = $this->getRequest();
 		if ($listMode = $request->get('_list_mode')) {
 			$this->admin->setListMode($listMode);

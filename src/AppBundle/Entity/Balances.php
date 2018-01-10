@@ -23,7 +23,8 @@ class Balances{
 
 
 	public function __construct() {
-		$this->addDate = new \DateTime();
+		$this->addDate = new \DateTime(	'now', new \DateTimeZone('Europe/Kiev'));
+
 	}
 
 	/**
@@ -84,6 +85,13 @@ class Balances{
 	private $priceBtc;
 
 	/**
+	 * @var float
+	 *
+	 * @ORM\Column(name="profit", type="decimal", precision=10, scale=2, nullable=true)
+	 */
+	private $profit;
+
+	/**
 	 * @var text
 	 *
 	 * @ORM\Column(name="stock_exchange", type="text", nullable=true)
@@ -103,6 +111,8 @@ class Balances{
 	 * @ORM\Column(name="my_balance", type="boolean", nullable=true)
 	 */
 	private $myBalance = false;
+
+
 
 	/**
 	 * @var integer
@@ -173,6 +183,21 @@ class Balances{
 	 */
 	public function setFarm2($farm2) {
 		$this->farm2 = $farm2;
+	}
+
+
+	/**
+	 * @return float
+	 */
+	public function getProfit() {
+		return $this->profit;
+	}
+
+	/**
+	 * @param float $profit
+	 */
+	public function setProfit($profit) {
+		$this->profit = $profit;
 	}
 
 	/**

@@ -27,7 +27,6 @@ class StatisticRepository extends \Doctrine\ORM\EntityRepository
 				$res[$k][] = $v;
 			}
 		}
-		dump($res);
 		return $res;
 
 

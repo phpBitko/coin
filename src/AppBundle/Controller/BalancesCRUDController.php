@@ -4,6 +4,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Service\Currency;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Sonata\AdminBundle\Controller\CRUDController as Controller;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -37,8 +38,56 @@ class BalancesCRUDController extends Controller
 		// return new RedirectResponse($this->admin->generateUrl('list', array('filter' => $this->admin->getFilterParameters())));
 	}
 
-	public function listAction() {
-		return parent::listAction();
+	public function preList(Request $request) {
+		if ($listMode = $request->get('_list_mode')) {
+			$this->admin->setListMode($listMode);
+		}
+
+		$datagrid = $this->admin->getDatagrid();
+		$em = $this->getDoctrine()->getManager();
+		$lastBalances =
+			$em->getRepository('AppBundle:Statistic')-> findOneBy(array(),array('id' => 'DESC'));
+		$data = [];
+		$data['priceUsd'] = $lastBalances->getPriceUsd();
+		$data['priceBtc'] = $lastBalances->getPriceBtc();
+		$data['profit'] = $lastBalances->getProfit();
+		/*$orderHistoryes = $datagrid->getResults();
+		$data = [];
+		$data['price'] = 0;
+		$data['priceUsd'] = 0;
+		$data['quantity'] = 0;
+		$data['currency'] = '';
+		if(isset($orderHistoryes[0])){
+			$currency =  explode('-',$orderHistoryes[0]->getExchange());
+			$data['currency'] = $currency['0'];
+		}
+		foreach ($orderHistoryes as $orderHistory){
+			if($orderHistory->getOrderType() == 'sell'){
+				$data['price'] = $data['price'] + $orderHistory->getPrice();
+				$data['priceUsd'] = $data['priceUsd'] + $orderHistory->getPriceUsd();
+				$data['quantity'] = $data['quantity'] - $orderHistory->getQuantity();
+			}else{
+				$data['price'] = $data['price'] - $orderHistory->getPrice();
+				$data['priceUsd'] = $data['priceUsd'] - $orderHistory->getPriceUsd();
+				$data['quantity'] = $data['quantity'] + $orderHistory->getQuantity();
+			}
+		}*/
+
+		$formView = $datagrid->getForm()->createView();
+
+		// set the theme for the current Admin Form
+		//$this->setFormTheme($formView, $this->admin->getFilterTheme());
+
+		return $this->render($this->admin->getTemplate('list'), array(
+			'action' => 'list',
+			'form' => $formView,
+			'datagrid' => $datagrid,
+			'data'=>$data,
+			'csrf_token' => $this->getCsrfToken('sonata.batch'),
+			'export_formats' => $this->has('sonata.admin.admin_exporter') ?
+				$this->get('sonata.admin.admin_exporter')->getAvailableFormats($this->admin) :
+				$this->admin->getExportFormats(),
+		), null);
 	}
 
 

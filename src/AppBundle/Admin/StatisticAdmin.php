@@ -32,6 +32,7 @@ class StatisticAdmin extends AbstractAdmin
 			->add('priceBtc', null, array('label' => 'Загальна сума, BTC'))
 			->add('priceUsdFarm1', null, array('label' => 'Сума на 1 фермі, $'))
 			->add('priceUsdFarm2', null, array('label' => 'Сума на 2 фермі, $'))
-			->add('addDate', 'date', array('label' => 'Дата оновлення', 'format' => 'd-m-Y H:i'));
+			->add('addDate', 'date', array('label' => 'Дата оновлення', 'format' => 'd-m-Y H:i'))
+		    ->add('profit', null, array('label' => 'Профіт, $',  'collapse' => array()));
 	}
 }

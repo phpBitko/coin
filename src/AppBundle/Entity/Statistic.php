@@ -50,6 +50,27 @@ class Statistic{
 	private $priceUsdFarm2;
 
 	/**
+	 * @var float
+	 *
+	 * @ORM\Column(name="profit", type="decimal", precision=10, scale=2,  nullable=true)
+	 */
+	private $profit;
+
+	/**
+	 * @return float
+	 */
+	public function getProfit() {
+		return $this->profit;
+	}
+
+	/**
+	 * @param float $profit
+	 */
+	public function setProfit($profit) {
+		$this->profit = $profit;
+	}
+
+	/**
 	 * @return int
 	 */
 	public function getId(){

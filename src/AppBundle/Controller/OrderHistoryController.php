@@ -92,13 +92,14 @@ class OrderHistoryController extends Controller
 	}
 
 	private function updateOrderHystoryBittrex() {
-		$bittrexClient = new BittrexClient();
+		$apiKey = $this->getParameter('app_bundle.bittrex_api_key');
+		$apiSecret = $this->getParameter('app_bundle.bittrex_secret_key');
+		$bittrexClient = new BittrexClient($apiKey, $apiSecret);
 		$orderHistoryBittrex = $bittrexClient->getOrderHistory();
 		$currency = $this->get('app.service.currency');
 
 		if (empty($orderHistoryBittrex)) {
 			$this->errors[] = 'Історію ордерів на Bittrex не знайдено!';
-
 			return false;
 		} else {
 			$em = $this->getDoctrine()->getManager();
@@ -122,7 +123,9 @@ class OrderHistoryController extends Controller
 
 
 	private function updateOrderHistoryLiqui() {
-		$liquiClient = new Liqui();
+		$apiKey = $this->getParameter('app_bundle.liqui_api_key');
+		$apiSecret = $this->getParameter('app_bundle.liqui_secret_key');
+		$liquiClient = new Liqui($apiKey, $apiSecret);
 		$orderHistoryLiqui = $liquiClient->tradeHistory();
 		$currency = $this->get('app.service.currency');
 		if (isset($orderHistoryLiqui['success']) && $orderHistoryLiqui['success'] != 1) {
@@ -148,7 +151,9 @@ class OrderHistoryController extends Controller
 	}
 
 	private function updateOrderHistoryHitBTC() {
-		$hitBTCClient = new HitBTC();
+		$apiKey = $this->getParameter('app_bundle.hitbtc_api_key');
+		$apiSecret = $this->getParameter('app_bundle.hitbtc_secret_key');
+		$hitBTCClient = new HitBTC($apiKey, $apiSecret);
 		$orderHistoryHitBtc = $hitBTCClient->tradeHistory();
 		$currency = $this->get('app.service.currency');
 		if (empty($orderHistoryHitBtc)) {
@@ -176,7 +181,6 @@ class OrderHistoryController extends Controller
 	private function updateOrderHistoryExmo() {
 		$exmoClient = new ExmoClient();
 		$orderHistoryExmo = $exmoClient->tradeHistory();
-		dump($orderHistoryExmo );
 		return true;
 		$currency = $this->get('app.service.currency');
 		if (empty($orderHistoryHitBtc)) {
@@ -201,7 +205,9 @@ class OrderHistoryController extends Controller
 	}
 
 	private function updateOrderHistoryCryptopia() {
-		$cryptopiaClient = new CryptopiaClient();
+		$apiKey = $this->getParameter('app_bundle.cryptopia_api_key');
+		$apiSecret = $this->getParameter('app_bundle.cryptopia_secret_key');
+		$cryptopiaClient = new CryptopiaClient($apiKey, $apiSecret);
 		$orderHistoryCriptopia = $cryptopiaClient->getTradeHistory(array('market'=>''));
 		if(isset($orderHistoryCriptopia['success'])){
 			if($orderHistoryCriptopia['success'] == true){

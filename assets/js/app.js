@@ -72,7 +72,7 @@ $(document).ready(function () {
                 waitingDialog.hide();
                 // console.log(bootbox);
                 bootbox.alert(data.message);
-                location.reload();
+              //  location.reload();
             }
         });
     })
@@ -111,7 +111,6 @@ $(document).ready(function () {
                 waitingDialog.hide();
                 bootbox.alert(data.message);
                 //location.reload();
-
             }
         });
     })

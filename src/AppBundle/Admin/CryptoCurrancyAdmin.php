@@ -20,13 +20,13 @@ class CryptoCurrancyAdmin extends AbstractAdmin
 	protected function configureDatagridFilters(DatagridMapper $datagridMapper) {
 		$datagridMapper->add('name')->add('symbol', null, array(), null, array('label' => 'Скорочена назва'))
 			->add('isActive')
-		    ->add('isMyCurrency', null,  array('show_filter'=>true));
+		    ->add('isMyCurrency', null,  array('label' => 'Мої валюти', 'show_filter' => true));
 	}
 
 	protected function configureListFields(ListMapper $listMapper) {
 		$listMapper->addIdentifier('name', null, array('label' => 'Назва'))
 			->add('symbol', 'text', array('label' => 'Скорочена назва',/*'header_class' => 'customActions'*//*, 'label_icon' => 'fa fa-thumbs-o-up'/*,"header_class" =>"col-md-5" */))
-			->add('lastUpdated', null, array('label' => 'Дата оновлення'))
+			->add('lastUpdated', null, array('label' => 'Дата оновлення', 'format' => 'd.m.Y H:i'))
 			->add('priceUsd', null, array('label' => 'Ціна, $','label_icon' => 'fa fa-usd'/* 'identifier'=>true)*/))
 			->add('priceBtc', null, array('label' => 'Ціна, BTC', 'label_icon' => 'fa fa-btc'))
 			->add('percentChange1h', null, array('label' => 'Зміна ціни за 1 год.,%', 'collapse' => array()))

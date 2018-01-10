@@ -52,7 +52,6 @@ class BalancesController extends Controller
 			foreach ($oldBallances as $k => $v) {
 				$v->setIsActive(false);
 				$em->persist($v);
-				$em->flush();
 			}
 
 			/*//Отримуємо дані із Полонекса
@@ -61,15 +60,15 @@ class BalancesController extends Controller
 				$this->isErrors = true;
 			}*/
 
-			//Отримуємо дані із Йобіт
-			$updateYobit = $this->updateYobit($activeBallances);
-			if ($updateYobit === false) {
-				$this->isErrors = true;
-			}
-
 			//Отримуємо дані із Лікві
 			$updateLiqui = $this->updateLiqui($activeBallances);
 			if ($updateLiqui === false) {
+				$this->isErrors = true;
+			}
+
+			//Отримуємо дані із Йобіт
+			$updateYobit = $this->updateYobit($activeBallances);
+			if ($updateYobit === false) {
 				$this->isErrors = true;
 			}
 
@@ -99,12 +98,12 @@ class BalancesController extends Controller
 
 
 			$myBallances = $em->getRepository('AppBundle:Balances')->findBy(array('myBalance' => true));
+
 			if(!empty($myBallances)){
 				$currency = $this->get('app.service.currency');
 				foreach ($myBallances as $myBallance){
 					$myBallance = $currency->addPrice($myBallance);
 					$em->persist($myBallance);
-					$em->flush();
 				}
 			}
 
@@ -112,6 +111,7 @@ class BalancesController extends Controller
 
 			//Додаємо статистику
 			$ballances = $em->getRepository('AppBundle:Balances')->findBy(array('isActive' => true));
+			$lastStatistic = $em->getRepository('AppBundle:Statistic')->findOneBy(array(), array('id'=>'DESC'));
 			$usdBallanceFarm1 = 0;
 			$usdBallanceFarm2 = 0;
 			$usdBallance = 0;
@@ -126,10 +126,9 @@ class BalancesController extends Controller
 			$statistic->setPriceUsdFarm2($usdBallanceFarm2);
 			$statistic->setPriceUsd($usdBallance);
 			$statistic->setPriceBtc($btcBallance);
+			$statistic->setProfit($usdBallance - $lastStatistic->getPriceUsd());
 			$em->persist($statistic);
 			$em->flush();
-
-
 
 			if ($this->isErrors === true) {
 				$message = implode('', $this->errors);
@@ -166,9 +165,11 @@ class BalancesController extends Controller
 				) {
 					if($activeBallances !== null){
 						$balances = $this->setFarms($activeBallances, $balances);
+						//Вичисляємо і записуємо профіт
+						$balances = $this->setProfit($activeBallances, $balances);
 					}
 					$em->persist($balances);
-					$em->flush();
+					//$em->flush();
 
 				} else {
 					unset($balances);
@@ -179,6 +180,24 @@ class BalancesController extends Controller
 		return true;
 	}
 
+	private function setProfit($activeBallances, $balancesCurrent){
+		foreach ($activeBallances as $ballOne){
+			if($balancesCurrent->getStockExchange() == 'мій'){
+				dump($balancesCurrent);
+			}
+			if($ballOne->getCurrency() == $balancesCurrent->getCurrency() && $ballOne->getStockExchange() == $balancesCurrent->getStockExchange()){
+				$balancesCurrent->setProfit($balancesCurrent->getPriceUsd() - $ballOne->getPriceUsd());
+				if($balancesCurrent->getStockExchange() == 'мій'){
+					dump($ballOne);
+					dump($balancesCurrent->getPriceUsd());
+					dump($ballOne->getPriceUsd());
+					dump($balancesCurrent);
+				}
+				return $balancesCurrent;
+			}
+		}
+		return $balancesCurrent;
+	}
 
 	private function updateCryptopia($activeBallances = null) {
 		$apiKey = $this->getParameter('app_bundle.cryptopia_api_key');
@@ -201,9 +220,10 @@ class BalancesController extends Controller
 				) {
 					if($activeBallances !== null){
 						$balances = $this->setFarms($activeBallances, $balances);
+						$balances = $this->setProfit($activeBallances, $balances);
 					}
 					$em->persist($balances);
-					$em->flush();
+					//$em->flush();
 
 				} else {
 					unset($balances);
@@ -275,9 +295,10 @@ class BalancesController extends Controller
 				}
 				if($activeBallances !== null){
 					$balances = $this->setFarms($activeBallances, $balances);
+					$balances = $this->setProfit($activeBallances, $balances);
 				}
 				$em->persist($balances);
-				$em->flush();
+				//$em->flush();
 			}
 		}
 
@@ -309,9 +330,10 @@ class BalancesController extends Controller
 					$balances = $currency->addPrice($balances);
 					if($activeBallances !== null){
 						$balances = $this->setFarms($activeBallances, $balances);
+						$balances = $this->setProfit($activeBallances, $balances);
 					}
 					$em->persist($balances);
-					$em->flush();
+					//$em->flush();
 				}
 			}
 		}
@@ -319,14 +341,15 @@ class BalancesController extends Controller
 		return true;
 	}
 
-	private function setFarms($activeBallances, $balances){
+	private function setFarms($activeBallances, $balancesCurrent){
 		foreach ($activeBallances as $activeBallance){
-			if($activeBallance->getCurrency() == $balances->getCurrency() && $activeBallance->getStockExchange() == $balances->getStockExchange()){
-				$balances->setFarm1($activeBallance->getFarm1());
-				$balances->setFarm2($activeBallance->getFarm2());
+			if($activeBallance->getCurrency() == $balancesCurrent->getCurrency() && $activeBallance->getStockExchange() == $balancesCurrent->getStockExchange()){
+				$balancesCurrent->setFarm1($activeBallance->getFarm1());
+				$balancesCurrent->setFarm2($activeBallance->getFarm2());
+				return $balancesCurrent;
 			}
 		}
-		return $balances;
+		return $balancesCurrent;
 	}
 
 
@@ -350,12 +373,11 @@ class BalancesController extends Controller
 				$balances->setStockExchange('Liqui');
 				$balances = $currency->addPrice($balances);
 				if($activeBallances !== null){
-					foreach ($activeBallances as $activeBallance){
-						$balances = $this->setFarms($activeBallances, $balances);
-					}
+					$balances = $this->setFarms($activeBallances, $balances);
+					$balances = $this->setProfit($activeBallances, $balances);
 				}
 				$em->persist($balances);
-				$em->flush();
+				//$em->flush();
 			}
 		}
 
@@ -387,19 +409,16 @@ class BalancesController extends Controller
 					$balances->setStockExchange('Exmo');
 					$balances = $currency->addPrice($balances);
 					if($activeBallances !== null){
-						foreach ($activeBallances as $activeBallance){
-							$balances = $this->setFarms($activeBallances, $balances);
-						}
+						$balances = $this->setFarms($activeBallances, $balances);
+						$balances = $this->setProfit($activeBallances, $balances);
 					}
 					$em->persist($balances);
-					$em->flush();
+					//$em->flush();
 				}
 			}
-
 			return true;
-		} catch (\Exception $exception) {
+		}catch(\Exception $exception) {
 			$this->errors[] = 'Баланс на Exmo не знайдено!'.$exception->getMessage();
-
 			return false;
 		}
 	}

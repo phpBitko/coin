@@ -37,8 +37,7 @@ class CurrencyController extends Controller
 
 			foreach ($data as $k => $v) {
 				$currency = $this->get('app.service.currency');
-
-				$cryptoCurrency = $em->getRepository('AppBundle:CryptoCurrency')->findOneBy(array('symbol'=> $v['symbol']));
+				$cryptoCurrency = $em->getRepository('AppBundle:CryptoCurrency')->findOneBy(array('name'=> $v['name']));
 				if(!empty($cryptoCurrency)){
 					$cryptoCurrency = $currency->apiArrayToObject($v, $cryptoCurrency);
 				}else{

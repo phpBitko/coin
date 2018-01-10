@@ -70,6 +70,7 @@ Class Currency
 			if (!empty($data['last_updated'])) {
 				$lastUpdated = date('Y-m-d H:i:s', $data['last_updated']);
 				$lastUpdated = new \DateTime($lastUpdated);
+				$lastUpdated->setTimezone(new \DateTimeZone('Europe/Kiev'));
 				$cryptoCurrency->setLastUpdated($lastUpdated);
 			}
 
@@ -449,8 +450,16 @@ Class Currency
 	public function addPrice(Balances $balances) {
 		$em = $this->entityManager;
 		$cryptoCurrency = $em->getRepository('AppBundle:CryptoCurrency');
-		$cryptoCurrency = $cryptoCurrency->findOneBy(array('symbol' => $balances->getCurrency()));
+		if($balances->getCurrency() == 'CAT'){
+			$cryptoCurrency = $cryptoCurrency->findOneBy(array('name' => 'Catcoin'));
+		}else{
+			$cryptoCurrency = $cryptoCurrency->findOneBy(array('symbol' => $balances->getCurrency()));
+		}
+
 		if ($cryptoCurrency !== null) {
+			if($balances->isMyBalance() === true){
+				$balances->setProfit($cryptoCurrency->getPriceUsd() * $balances->getBalance()-$balances->getPriceUsd());
+			}
 			$balances->setPriceUsd($cryptoCurrency->getPriceUsd() * $balances->getBalance());
 			$balances->setPriceBtc($cryptoCurrency->getPriceBtc() * $balances->getBalance());
 			$balances->setName($cryptoCurrency->getName());
