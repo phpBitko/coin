@@ -161,8 +161,11 @@ class Statistic{
 	 */
 	private $addDate;
 
+	/**
+	 * Statistic constructor.
+	 */
 	public function __construct() {
-		$this->addDate = new \DateTime();
+		$this->addDate = new \DateTime('now', new \DateTimeZone('Europe/Kiev'));
 	}
 
 }

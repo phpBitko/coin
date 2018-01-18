@@ -291,7 +291,9 @@ Class YobitClient
 		];
 		$publicUrl = $this->getPublicUrl($version);
 		$url = $publicUrl.$segments.'?'.http_build_query(array_filter($parameters));
+		dump($url);
 		$feed = file_get_contents($url, false, stream_context_create($options));
+		dump($feed);
 		$response = json_decode($feed, true);
 		if (isset($response['error'])) {
 			Log::error($response['error']);
@@ -339,6 +341,7 @@ Class YobitClient
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 		$response = curl_exec($ch);
+		dump($response);
 		if ($response === false) {
 			throw new \Exception('Curl error: '.curl_error($ch));
 		}

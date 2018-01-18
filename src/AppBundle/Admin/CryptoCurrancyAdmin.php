@@ -24,7 +24,7 @@ class CryptoCurrancyAdmin extends AbstractAdmin
 	}
 
 	protected function configureListFields(ListMapper $listMapper) {
-		$listMapper->addIdentifier('name', null, array('label' => 'Назва'))
+		$listMapper->addIdentifier('name', null, array('label' => 'Назва', 'template'=>'AppBundle:CryptoCurrencyAdmin:customCurrencyListField.html.twig'))
 			->add('symbol', 'text', array('label' => 'Скорочена назва',/*'header_class' => 'customActions'*//*, 'label_icon' => 'fa fa-thumbs-o-up'/*,"header_class" =>"col-md-5" */))
 			->add('lastUpdated', null, array('label' => 'Дата оновлення', 'format' => 'd.m.Y H:i'))
 			->add('priceUsd', null, array('label' => 'Ціна, $','label_icon' => 'fa fa-usd'/* 'identifier'=>true)*/))

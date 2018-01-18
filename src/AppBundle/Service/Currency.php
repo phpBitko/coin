@@ -51,7 +51,6 @@ Class Currency
 			if (!empty($data['total_supply'])) {
 				$cryptoCurrency->setTotalSupply($data['total_supply']);
 			}
-
 			if (!empty($data['max_supply'])) {
 				$cryptoCurrency->setMaxSupply($data['max_supply']);
 			}
@@ -117,55 +116,135 @@ Class Currency
 		}
 	}
 
-
-	public function apiBittrexToObjectOrderHistory($data) {
+	public function apiBalancesToObjectBalances($balances = array(),$activeBallances = array(), $stockExchange = '') {
 		try {
 			$em = $this->entityManager;
+			if (!empty($balances)) {
+				foreach ($balances as $k => $v) {
+					if(!empty($v)){
+						$balance = new Balances();
+						$balance->setIsActive(true);
+						$balance->setStockExchange(ucfirst($stockExchange));
+						$balance->setCurrency($k);
+						$balance->setBalance($v);
+						$balance = $this->setFarms($activeBallances, $balance);
+						$balance = $this->addPrice($balance);
+						$balance = $this->setProfit($activeBallances, $balance);
+						$em->persist($balance);
+					}
+				}
+			}
+
+			return true;
+		} catch (Exception $exception) {
+			$this->errors = $exception->getMessage();
+			return false;
+		}
+	}
+
+
+	private function setFarms($activeBallances, $balancesCurrent) {
+		if (!empty($activeBallances)) {
+			foreach ($activeBallances as $activeBallance) {
+				if ($activeBallance->getCurrency() == $balancesCurrent->getCurrency()
+					&& $activeBallance->getStockExchange() == $balancesCurrent->getStockExchange()
+				) {
+					$balancesCurrent->setFarm1($activeBallance->getFarm1());
+					$balancesCurrent->setFarm2($activeBallance->getFarm2());
+
+					return $balancesCurrent;
+				}
+			}
+		}
+		return $balancesCurrent;
+	}
+
+	private function setProfit($activeBallances, $balancesCurrent){
+		if (!empty($activeBallances)) {
+			foreach ($activeBallances as $ballOne){
+				if($ballOne->getCurrency() == $balancesCurrent->getCurrency() && $ballOne->getStockExchange() == $balancesCurrent->getStockExchange()){
+
+					dump($balancesCurrent->getPriceUsd() );
+					dump( $ballOne->getPriceUsd());
+					$balancesCurrent->setProfit($balancesCurrent->getPriceUsd() - $ballOne->getPriceUsd());
+					return $balancesCurrent;
+				}
+			}
+		}
+		return $balancesCurrent;
+	}
+
+	/*public function apiToObjectOrderHistory(array $data, $stockExchange) {
+		try{
+
+			switch (lcfirst($stockExchange)){
+			case 'bittrex':
+				$orderHistory = $this->apiBittrexToObjectOrderHistory($data);
+				break;
+			}
+
+
+			if($orderHistory === false){
+				throw new Exception($this->errors);
+			}
+
+		}catch (Exception $exception){
+			$this->errors = $exception->getMessage();
+			return false;
+		}
+
+	}*/
+
+	public function apiToObjectOrderHistory($data, $stockExchange) {
+		try {
+
+			$em = $this->entityManager;
+
 			$orderHistoryRep = $em->getRepository('AppBundle:OrderHistory');
-			$res = $orderHistoryRep->findOneBy(array('orderUuid' => $data['OrderUuid'], 'stockExchange'=>'Bittrex'));
+
+			if(!empty($data['info']['OrderUuid'])){
+				$res = $orderHistoryRep->findOneBy(array('orderUuid' => $data['info']['OrderUuid'], 'stockExchange'=>$stockExchange));
+			}
+
 			if(!empty($res)){
 				return null;
 			}
-			$orderHistory = new OrderHistory();
 
-			if (!empty($data['OrderUuid'])) {
-				$orderHistory->setOrderUuid($data['OrderUuid']);
+			$orderHistory = new OrderHistory();
+			if (!empty($data['info']['OrderUuid'])) {
+				$orderHistory->setOrderUuid($data['info']['OrderUuid']);
 			}
-			if (!empty($data['Exchange'])) {
-				$orderHistory->setExchange($data['Exchange']);
+
+			if (!empty($data['symbol'])) {
+				$currency = explode('/', $data['symbol']);
+				$currency = $currency[1].'-'.$currency[0];
+				$orderHistory->setExchange($currency);
 			}
-			if (!empty($data['TimeStamp'])) {
-				$addDate = new \DateTime($data['TimeStamp']);
+			if (!empty($data['datetime'])) {
+				$addDate = new \DateTime($data['datetime']);
+				$addDate->setTimezone(new \DateTimeZone('Europe/Kiev'));
 				$orderHistory->setAddDate($addDate);
 			}
-			if (!empty($data['OrderType'])) {
-				if($data['OrderType'] == 'LIMIT_BUY'){
-					$orderHistory->setOrderType('buy');
-				}else if($data['OrderType'] == 'LIMIT_SELL'){
-					$orderHistory->setOrderType('sell');
-				}else{
-					$orderHistory->setOrderType($data['OrderType']);
-				}
+			if (!empty($data['side'])) {
+				$orderHistory->setOrderType($data['side']);
 			}
-			if (!empty($data['Limit'])) {
-				$orderHistory->setLimit($data['Limit']);
+
+			if (!empty($data['amount'])) {
+				$orderHistory->setQuantity($data['amount']);
 			}
-			if (!empty($data['Quantity'])) {
-				$orderHistory->setQuantity($data['Quantity']);
+			if (!empty($data['remaining'])) {
+				$orderHistory->setQuantityRemaining($data['remaining']);
 			}
-			if (!empty($data['QuantityRemaining'])) {
-				$orderHistory->setQuantityRemaining($data['QuantityRemaining']);
+			if (!empty($data['fee']['cost'])) {
+				$orderHistory->setCommission($data['fee']['cost']);
 			}
-			if (!empty($data['Commission'])) {
-				$orderHistory->setCommission($data['Commission']);
+			if (!empty($data['cost'])) {
+				$orderHistory->setPrice($data['cost']);
 			}
-			if (!empty($data['Price'])) {
-				$orderHistory->setPrice($data['Price']);
+			if (!empty($data['price'])) {
+				$orderHistory->setPricePerUnit($data['price']);
 			}
-			if (!empty($data['PricePerUnit'])) {
-				$orderHistory->setPricePerUnit($data['PricePerUnit']);
-			}
-			if (!empty($data['IsConditional'])) {
+			/*if (!empty($data['IsConditional'])) {
 				$orderHistory->setIsConditional($data['IsConditional']);
 			}
 			if (!empty($data['Condition'])) {
@@ -173,29 +252,27 @@ Class Currency
 			}
 			if (!empty($data['ConditionTarget'])) {
 				$orderHistory->setConditionTarget($data['ConditionTarget']);
-			}
+			}*/
 
-			if (!empty($data['ImmediateOrCancel'])) {
+		/*	if (!empty($data['ImmediateOrCancel'])) {
 				$orderHistory->setImmediateOrCancel($data['ImmediateOrCancel']);
-			}
+			}*/
 
-			if (!empty($data['Closed'])) {
-				$closedDate = new \DateTime($data['Closed']);
-				$orderHistory->setClosedDate($closedDate);
+			if (!empty($data['status'])) {
+				$orderHistory->setStatus($data['status']);
 			}
-
-			$currency = explode('-', $data['Exchange']);
-			$currency = $currency[1];
+			$currency = explode('/', $data['symbol']);
+			$currency = $currency[0];
 			$cryptoCurrency = $em->getRepository('AppBundle:CryptoCurrency');
 			$cryptoCurrency = $cryptoCurrency->findOneBy(array('symbol' => $currency));
-			$orderHistory->setPriceUsdPerUnit($cryptoCurrency->getPriceUsd());
-			$orderHistory->setPriceUsd($cryptoCurrency->getPriceUsd()*$orderHistory->getQuantity());
-
-			//$balances->setIsActive(true);
-			$orderHistory->setStockExchange('Bittrex');
-			//$balances = $this->addPrice($balances);
+			if(!empty($cryptoCurrency)){
+				$orderHistory->setPriceUsdPerUnit($cryptoCurrency->getPriceUsd());
+				$orderHistory->setPriceUsd($cryptoCurrency->getPriceUsd()*$orderHistory->getQuantity());
+			}
+			$orderHistory->setStockExchange($stockExchange);
 
 			return $orderHistory;
+
 		} catch (\Exception $exception) {
 			$this->errors = $exception->getMessage();
 			return false;
@@ -450,8 +527,11 @@ Class Currency
 	public function addPrice(Balances $balances) {
 		$em = $this->entityManager;
 		$cryptoCurrency = $em->getRepository('AppBundle:CryptoCurrency');
+
 		if($balances->getCurrency() == 'CAT'){
 			$cryptoCurrency = $cryptoCurrency->findOneBy(array('name' => 'Catcoin'));
+		}elseif ($balances->getCurrency() == 'BCC' && $balances->getStockExchange() == 'Bittrex'){
+			$cryptoCurrency = $cryptoCurrency->findOneBy(array('symbol' => 'BCH'));
 		}else{
 			$cryptoCurrency = $cryptoCurrency->findOneBy(array('symbol' => $balances->getCurrency()));
 		}

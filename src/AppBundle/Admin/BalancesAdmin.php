@@ -9,6 +9,8 @@ use Sonata\AdminBundle\Form\FormMapper;
 use Sonata\AdminBundle\Route\RouteCollection;
 use Sonata\AdminBundle\Show\ShowMapper;
 
+
+
 class BalancesAdmin extends AbstractAdmin
 {
 	protected $datagridValues = array(
@@ -46,7 +48,7 @@ class BalancesAdmin extends AbstractAdmin
 	protected function configureDatagridFilters(DatagridMapper $datagridMapper) {
 		$em = $this->getModelManager()->getEntityManager('AppBundle\Entity\Balances');
 		$stockExchangeResult =
-			$em->createQueryBuilder('b')->select('b.stockExchange')->from('AppBundle\Entity\Balances', 'b')
+			$em->createQueryBuilder('b')->select('b.stockExchange')->from('AppBundle\Entity\Balances', 'b')->where('b.isActive = true')
 				->groupBy('b.stockExchange')->orderBy('b.stockExchange', 'ASC')->getQuery()->getResult();
 		$stockExchangeChoices = array();
 		foreach ($stockExchangeResult as $stockExchangeRow) {
@@ -82,7 +84,7 @@ class BalancesAdmin extends AbstractAdmin
 	}
 
 	protected function configureListFields(ListMapper $listMapper) {
-		$listMapper->addIdentifier('currency', 'text', array('label' => 'Назва валюти'))
+		$listMapper->addIdentifier('currency', 'text', array('label' => 'Назва валюти','template' => 'AppBundle:BalancesAdmin:customCurrencyListField.html.twig'))
 			->add('name', null, array('label'=>'Повна назва'))
 			->add('balance', null, array('label'=>'Баланс'))
 			->add('available', null, array('label'=>'Доступно'))

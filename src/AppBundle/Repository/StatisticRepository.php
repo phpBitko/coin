@@ -2,6 +2,8 @@
 
 namespace AppBundle\Repository;
 
+use Symfony\Component\Validator\Constraints\DateTime;
+
 
 /**
  * BalanceRepository
@@ -24,7 +26,15 @@ class StatisticRepository extends \Doctrine\ORM\EntityRepository
 		$res = [];
 		foreach ($qb as $k =>$one){
 			foreach ($one as $k=>$v){
-				$res[$k][] = $v;
+
+				dump(is_a($v,'DateTime'));
+				if(is_a($v,'DateTime')){
+					dump($v);
+					$res[$k][] = $v->format('m.d.Y H:m');
+				}else{
+					$res[$k][] = $v;
+				}
+
 			}
 		}
 		return $res;

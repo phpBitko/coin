@@ -15,10 +15,18 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use AppBundle\Service\BittrexClient;
 use AppBundle\Service\PolonexClient;
 use AppBundle\Service\Currency;
-use AppBundle\Service\HitBTCClient\HitBTC;
-use AppBundle\Service\LiquiClient\Liqui;
+use AppBundle\Service\HitBTCClient\HitBTC as HitBTCOld;
+use AppBundle\Service\LiquiClient\Liqui as LiquiOld;
 use AppBundle\Service\YobitClient;
 use AppBundle\Entity\OrderStatistic;
+use ccxt\kucoin;
+use ccxt\bittrex;
+use ccxt\yobit;
+use ccxt\exmo;
+use ccxt\hitbtc2;
+use ccxt\liqui;
+use ccxt\Exchange;
+use ccxt\cryptopia;
 
 use AppBundle\Service\ExmoClient;
 use Symfony\Component\Security\Acl\Exception\Exception;
@@ -42,12 +50,28 @@ class OrderHistoryController extends Controller
 	 */
 	public function updateAction() {
 		try {
-			//Отримуємо дані із Бітрікса
-			$updateOrderHistoryBittrex = $this->updateOrderHystoryBittrex();
-			if ($updateOrderHistoryBittrex === false) {
-				$this->isErrors = true;
-			}
+			dump('111');
+			$em = $this->getDoctrine()->getManager();
+			$stockExchange = $em->getRepository('AppBundle:StockExchange')->findBy(['isActive' => true]);
+			foreach ($stockExchange as $exchange){
+				$apiKey = $this->getParameter('app_bundle.'.lcfirst($exchange->getName()).'_api_key');
+				$apiSecret = $this->getParameter('app_bundle.'.lcfirst($exchange->getName()).'_secret_key');
+				$exchangeClass = null;
+				switch (lcfirst($exchange->getName())){
+				case 'bittrex':
+					$exchangeClass = new bittrex(array('apiKey'=>$apiKey, 'secret'=>$apiSecret));
+					break;
+				}
 
+				if(!empty($exchangeClass)){
+					$orderHistory = $exchangeClass->fetch_orders();
+					$updateOrderHistory = $this->updateOrderHistory($orderHistory, $exchange->getName());
+					if ($updateOrderHistory === false) {
+						throw new Exception(implode('', $this->errors));
+					}
+				}
+			}
+			dump('sss');
 			$updateOrderHistoryLiqui = $this->updateOrderHistoryLiqui();
 			if ($updateOrderHistoryLiqui === false) {
 				$this->isErrors = true;
@@ -58,36 +82,49 @@ class OrderHistoryController extends Controller
 				$this->isErrors = true;
 			}
 
-			/*$updateOrderHistoryYobit = $this->updateOrderHistoryYobit();
-			if ($updateOrderHistoryYobit === false) {
-				$this->isErrors = true;
-			}*/
-
 			$updateOrderHistoryHitBTC = $this->updateOrderHistoryHitBTC();
 			if ($updateOrderHistoryHitBTC === false) {
 				$this->isErrors = true;
 			}
-
-			/*$updateOrderHistoryExmo = $this->updateOrderHistoryExmo();
-			if ($updateOrderHistoryExmo === false) {
-				$this->isErrors = true;
-			}*/
+			$em->flush();
 
 			$updateOrderStatistic = $this->updateOrderStatistic();
 			if ($updateOrderStatistic === false) {
 				$this->isErrors = true;
 			}
 
+
 			if ($this->isErrors === true) {
 				$message = implode('', $this->errors);
 				return new JsonResponse(array('message' => $message), Response::HTTP_BAD_REQUEST);
 			} else {
-
 				$message = 'Дані успішно оновлені!';
 				return new JsonResponse(array('message' => $message), Response::HTTP_OK);
 			}
 		} catch (\Exception $exception) {
 			return new JsonResponse($exception->getMessage(), Response::HTTP_BAD_REQUEST);
+		}
+	}
+
+	private function updateOrderHistory(array $orderHistory, $stockExchange) {
+		try {
+			$currency = $this->get('app.service.currency');
+			$em = $this->getDoctrine()->getManager();
+
+			foreach ($orderHistory as $k => $v) {
+				$orderHistory = $currency->apiToObjectOrderHistory($v, $stockExchange);
+				if ($orderHistory === false) {
+					$this->errors[] = $currency->getErrors();
+					return false;
+				}
+
+				if (!empty($orderHistory)) {
+					$em->persist($orderHistory);
+				}
+			}
+		} catch (Exception $exception) {
+			$this->errors[] = $exception->getMessage();
+			return false;
 		}
 	}
 
@@ -125,7 +162,7 @@ class OrderHistoryController extends Controller
 	private function updateOrderHistoryLiqui() {
 		$apiKey = $this->getParameter('app_bundle.liqui_api_key');
 		$apiSecret = $this->getParameter('app_bundle.liqui_secret_key');
-		$liquiClient = new Liqui($apiKey, $apiSecret);
+		$liquiClient = new LiquiOld($apiKey, $apiSecret);
 		$orderHistoryLiqui = $liquiClient->tradeHistory();
 		$currency = $this->get('app.service.currency');
 		if (isset($orderHistoryLiqui['success']) && $orderHistoryLiqui['success'] != 1) {
@@ -146,14 +183,13 @@ class OrderHistoryController extends Controller
 			}
 			$em->flush();
 		}
-
 		return true;
 	}
 
 	private function updateOrderHistoryHitBTC() {
 		$apiKey = $this->getParameter('app_bundle.hitbtc_api_key');
 		$apiSecret = $this->getParameter('app_bundle.hitbtc_secret_key');
-		$hitBTCClient = new HitBTC($apiKey, $apiSecret);
+		$hitBTCClient = new HitBTCOld($apiKey, $apiSecret);
 		$orderHistoryHitBtc = $hitBTCClient->tradeHistory();
 		$currency = $this->get('app.service.currency');
 		if (empty($orderHistoryHitBtc)) {

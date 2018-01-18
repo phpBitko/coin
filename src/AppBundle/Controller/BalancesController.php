@@ -16,13 +16,22 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use AppBundle\Service\BittrexClient;
 use AppBundle\Service\PolonexClient;
 use AppBundle\Service\Currency;
-use AppBundle\Service\HitBTCClient\HitBTC;
-use AppBundle\Service\LiquiClient\Liqui;
+//use AppBundle\Service\HitBTCClient\HitBTC;
+//use AppBundle\Service\LiquiClient\Liqui;
 use AppBundle\Service\YobitClient;
 use AppBundle\Entity\Balances;
+use ccxt\kucoin;
+use ccxt\bittrex;
+use ccxt\yobit;
+use ccxt\exmo;
+use ccxt\hitbtc2;
+use ccxt\liqui;
+use ccxt\Exchange;
+use ccxt\cryptopia;
 
 use AppBundle\Service\ExmoClient;
 use Symfony\Component\Security\Acl\Exception\Exception;
+
 
 /**
  *
@@ -53,15 +62,73 @@ class BalancesController extends Controller
 				$v->setIsActive(false);
 				$em->persist($v);
 			}
+			$stockExchange = $em->getRepository('AppBundle:StockExchange')->findBy(['isActive' => true]);
 
-			/*//Отримуємо дані із Полонекса
-			$updatePolonex = $this->updatePolonex();
-			if ($updatePolonex === false) {
+			$currency = $this->get('app.service.currency');
+			foreach ($stockExchange as $exchange){
+				$apiKey = $this->getParameter('app_bundle.'.lcfirst($exchange->getName()).'_api_key');
+				$apiSecret = $this->getParameter('app_bundle.'.lcfirst($exchange->getName()).'_secret_key');
+				switch (lcfirst($exchange->getName())){
+				case 'kucoin':
+					$exchangeClass = new kucoin(array('apiKey'=>$apiKey, 'secret'=>$apiSecret));
+					break;
+				case 'bittrex':
+					$exchangeClass = new bittrex(array('apiKey'=>$apiKey, 'secret'=>$apiSecret));
+					break;
+				case 'yobit':
+					$exchangeClass = new yobit(array('apiKey'=>$apiKey, 'secret'=>$apiSecret));
+					break;
+				case 'hitbtc':
+					$exchangeClass = new hitbtc2(array('apiKey'=>$apiKey, 'secret'=>$apiSecret));
+					break;
+				case 'cryptopia':
+					$exchangeClass = new cryptopia(array('apiKey'=>$apiKey, 'secret'=>$apiSecret));
+					break;
+				case 'exmo':
+					$exchangeClass = new exmo(array('apiKey'=>$apiKey, 'secret'=>$apiSecret));
+					break;
+				case 'liqui':
+					$exchangeClass = new liqui(array('apiKey'=>$apiKey, 'secret'=>$apiSecret));
+					break;
+				}
+				//dump('111');
+				if(!isset($exchangeClass)){
+					throw new Exception("Біржа ".$exchange->getName()." не знайдена!");
+				}
+				$balance = $exchangeClass->fetch_total_balance();
+				//dump($balance);
+				//exit;
+				$balanceEntities = $currency->apiBalancesToObjectBalances($balance, $activeBallances, $exchange->getName());
+
+				if(!$balanceEntities){
+					throw new Exception($currency->getErrors());
+				}
+
+			}
+
+			$myBallances = $em->getRepository('AppBundle:Balances')->findBy(array('myBalance' => true));
+
+			if(!empty($myBallances)){
+				$currency = $this->get('app.service.currency');
+				foreach ($myBallances as $myBallance){
+					$myBallance = $currency->addPrice($myBallance);
+					$em->persist($myBallance);
+				}
+			}
+			$em->flush();
+
+			if(!$this->addStatistic()){
+				throw new Exception(implode('! ', $this->errors));
+			}
+//Отримуємо дані із Йобіт
+			/*$updateYobit = $this->updateYobit($activeBallances);
+			if ($updateYobit === false) {
 				$this->isErrors = true;
 			}*/
+			//Додаємо статистику
 
 			//Отримуємо дані із Лікві
-			$updateLiqui = $this->updateLiqui($activeBallances);
+			/*$updateLiqui = $this->updateLiqui($activeBallances);
 			if ($updateLiqui === false) {
 				$this->isErrors = true;
 			}
@@ -128,7 +195,7 @@ class BalancesController extends Controller
 			$statistic->setPriceBtc($btcBallance);
 			$statistic->setProfit($usdBallance - $lastStatistic->getPriceUsd());
 			$em->persist($statistic);
-			$em->flush();
+			$em->flush();*/
 
 			if ($this->isErrors === true) {
 				$message = implode('', $this->errors);
@@ -138,7 +205,43 @@ class BalancesController extends Controller
 
 			return new JsonResponse(array('message' => $message), Response::HTTP_OK);
 		} catch (\Exception $exception) {
+			//dump($exception->getMessage());
 			return new JsonResponse($exception->getMessage(), Response::HTTP_BAD_REQUEST);
+		}
+	}
+
+	/**
+	 * @return bool
+	 */
+	private function addStatistic() {
+		try {
+			$statistic = new Statistic();
+			$em = $this->getDoctrine()->getManager();
+			$ballances = $em->getRepository('AppBundle:Balances')->findBy(array('isActive' => true));
+			$lastStatistic = $em->getRepository('AppBundle:Statistic')->findOneBy(array(), array('id' => 'DESC'));
+			$usdBallanceFarm1 = 0;
+			$usdBallanceFarm2 = 0;
+			$usdBallance = 0;
+			$btcBallance = 0;
+			foreach ($ballances as $ballance) {
+				$usdBallanceFarm1 += $ballance->getFarm1() / 100 * $ballance->getPriceUsd();
+				$usdBallanceFarm2 += $ballance->getFarm2() / 100 * $ballance->getPriceUsd();
+				$usdBallance += $ballance->getPriceUsd();
+				$btcBallance += $ballance->getPriceBtc();
+			}
+			$statistic->setPriceUsdFarm1($usdBallanceFarm1);
+			$statistic->setPriceUsdFarm2($usdBallanceFarm2);
+			$statistic->setPriceUsd($usdBallance);
+			$statistic->setPriceBtc($btcBallance);
+			$statistic->setProfit($usdBallance - $lastStatistic->getPriceUsd());
+			$em->persist($statistic);
+			$em->flush();
+
+			return true;
+		} catch (Exception $exception) {
+			$this->errors[] = $exception->getMessage();
+
+			return false;
 		}
 	}
 
@@ -182,17 +285,8 @@ class BalancesController extends Controller
 
 	private function setProfit($activeBallances, $balancesCurrent){
 		foreach ($activeBallances as $ballOne){
-			if($balancesCurrent->getStockExchange() == 'мій'){
-				dump($balancesCurrent);
-			}
 			if($ballOne->getCurrency() == $balancesCurrent->getCurrency() && $ballOne->getStockExchange() == $balancesCurrent->getStockExchange()){
 				$balancesCurrent->setProfit($balancesCurrent->getPriceUsd() - $ballOne->getPriceUsd());
-				if($balancesCurrent->getStockExchange() == 'мій'){
-					dump($ballOne);
-					dump($balancesCurrent->getPriceUsd());
-					dump($ballOne->getPriceUsd());
-					dump($balancesCurrent);
-				}
 				return $balancesCurrent;
 			}
 		}
@@ -310,6 +404,8 @@ class BalancesController extends Controller
 		$apiSecret = $this->getParameter('app_bundle.yobit_secret_key');
 		$yobitClient = new YobitClient($apiKey, $apiSecret);
 		$balanceYobit = $yobitClient->getTradeInfo();
+		dump($balanceYobit);
+		return;
 		$currency = $this->get('app.service.currency');
 		if (($balanceYobit['success'] != 1)) {
 			$this->errors[] = 'Баланс на Yobit не знайдено!';

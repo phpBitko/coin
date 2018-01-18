@@ -31,10 +31,15 @@ class CurrencyController extends Controller
 	 */
 	public function updateAllCurrencyAction(Request $request) {
 		try {
-			//return new JsonResponse(array('message'=>'Дані успішно оновлено'), Response::HTTP_OK);
-			$data = $request->request->get('data');
-			$em = $this->getDoctrine()->getManager();
+			// установка URL и других необходимых параметров
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, "https://api.coinmarketcap.com/v1/ticker/?limit=0");
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			$data = curl_exec($ch);
+			curl_close($ch);
+			$data = json_decode($data, true);
 
+			$em = $this->getDoctrine()->getManager();
 			foreach ($data as $k => $v) {
 				$currency = $this->get('app.service.currency');
 				$cryptoCurrency = $em->getRepository('AppBundle:CryptoCurrency')->findOneBy(array('name'=> $v['name']));

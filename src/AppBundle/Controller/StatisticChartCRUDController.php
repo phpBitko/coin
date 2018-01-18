@@ -16,31 +16,69 @@ class StatisticChartCRUDController extends Controller
 {
 	public function listAction() {
 		$em = $this->getDoctrine()->getManager();
-		$column = $em->getRepository('AppBundle:Statistic')->getColumn(array('priceUsd', 'priceBtc'));
+		$column = $em->getRepository('AppBundle:Statistic')->getColumn(array('priceUsd', 'priceBtc', 'addDate'));
+		$seriesUsd =
+			array(
+				'name' => 'Сума, USD',
+			//	'type'  => 'spline',
+				'color' => '#4572A7',
+				'yAxis' => 1,
+				'data' => $column['priceUsd']
 
-		$seriesUsd = array(
-			array("name" => "Сума", "data" => $column['priceUsd']),
+		);
+		$seriesBtc =
+			array(
+				'name' => 'Сума, BTC',
+			//	'type'  => 'spline',
+				'color' => '#AA4643',
+				'data' => $column['priceBtc']
+		);
+
+		$yData = array(
+			array(
+				'labels' => array(
+					'style'     => array('color' => '#AA4643')
+				),
+				'title' => array(
+					'text' => 'Сума, BTC',
+					'style' => array('color' => '#AA4643'),
+				),
+
+				'opposite' => true
+			),
+			array(
+				'labels' => array(
+					'style'     => array('color' => '#4572A7')
+				),
+
+				'title' => array(
+					'text' => 'Сума, $',
+					'style' => array('color' => '#4572A7'),
+				),
+			)
 		);
 		$obUsd = new Highchart();
 		$obUsd->chart->renderTo('linechart_usd');  // The #id of the div where to render the chart
-		$obUsd->title->text('Загальний баланс, USD');
-		$obUsd->xAxis->title(array('text' => "Дата"));
-		$obUsd->yAxis->title(array('text' => "Сума, $"));
-		$obUsd->series($seriesUsd);
-
-		$seriesBtc = array(
+		$obUsd->title->text('Загальний баланс');
+		$obUsd->xAxis->title(array('text' => 'Дата'));
+		$obUsd->xAxis->categories($column['addDate']);
+		$obUsd->yAxis($yData);
+		$obUsd->series(array($seriesUsd, $seriesBtc));
+		/*$seriesBtc = array(
 			array("name" => "Сума", "data" => $column['priceBtc']),
 		);
+
 		$obBtc = new Highchart();
 		$obBtc->chart->renderTo('linechart_btc');  // The #id of the div where to render the chart
 		$obBtc->title->text('Загальний баланс, BTC');
+
 		$obBtc->xAxis->title(array('text' => "Дата"));
+
 		$obBtc->yAxis->title(array('text' => "Сума, BTC"));
-		$obBtc->series($seriesBtc);
+		$obBtc->series($seriesBtc);*/
 
 		return $this->render('AppBundle:StatisticAdmin:updateStatisticChart.html.twig', array(
-			'chart1' => $obUsd,
-			'chart2' => $obBtc
+			'chart1' => $obUsd
 		));
 	}
 }

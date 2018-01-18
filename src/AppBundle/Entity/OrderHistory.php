@@ -79,6 +79,28 @@ class OrderHistory{
 	private $limitOrder;
 
 	/**
+	 * @var string
+	 *
+	 * @ORM\Column(name="status", type="string", nullable=true)
+	 */
+	private $status;
+
+	/**
+	 * @return string
+	 */
+	public function getStatus(): string {
+		return $this->status;
+	}
+
+	/**
+	 * @param string $status
+	 */
+	public function setStatus(string $status) {
+		$this->status = $status;
+	}
+
+
+	/**
 	 * @var float
 	 *
 	 * @ORM\Column(name="quantity", type="float", nullable=true)

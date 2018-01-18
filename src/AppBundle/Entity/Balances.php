@@ -112,8 +112,6 @@ class Balances{
 	 */
 	private $myBalance = false;
 
-
-
 	/**
 	 * @var integer
 	 *

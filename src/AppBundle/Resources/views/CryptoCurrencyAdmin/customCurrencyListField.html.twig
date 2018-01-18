@@ -1,0 +1,8 @@
+{% extends 'SonataAdminBundle:CRUD:base_list_field.html.twig' %}
+
+{% block field %}
+    <div>
+        <i class="cc {{ object.symbol }}"></i>
+        <strong>{{ object.name }}</strong> <br />
+    </div>
+{% endblock %}
