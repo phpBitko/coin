@@ -84,10 +84,10 @@ class BalancesAdmin extends AbstractAdmin
 	}
 
 	protected function configureListFields(ListMapper $listMapper) {
-		$listMapper->addIdentifier('currency', 'text', array('label' => 'Назва валюти','template' => 'AppBundle:BalancesAdmin:customCurrencyListField.html.twig'))
+		$listMapper->addIdentifier('currency', 'text', array(  'header_style' => 'min-width:120px;', 'label' => 'Назва валюти','template' => 'AppBundle:BalancesAdmin:customCurrencyListField.html.twig'))
 			->add('name', null, array('label'=>'Повна назва'))
 			->add('balance', null, array('label'=>'Баланс'))
-			->add('available', null, array('label'=>'Доступно'))
+			/*->add('available', null, array('label'=>'Доступно'))*/
 			//->add('pending', null, array('label'=>'В очікуванні'))
 			//->add('cryptoAddress', null, array('label'=>'Адреса гаманця'))
 			->add('stockExchange', null, array('label'=>'Назва біржі'))
