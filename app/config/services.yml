@@ -107,3 +107,10 @@ services:
         public: true
         tags:
             - {name: "sonata.block"}
+
+    app.admin.mining:
+        class: AppBundle\Admin\MiningAdmin
+        arguments: [~, AppBundle\Entity\Mining, ~]
+        tags:
+              - { name: sonata.admin, manager_type: orm, group: 'Майнінг', label: 'Статистика по майнінгу' }
+        public: true
