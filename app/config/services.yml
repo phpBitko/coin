@@ -83,6 +83,8 @@ services:
                - { name: sonata.admin, manager_type: orm, group: 'Меню', label: 'Статистика, таблиця' }
            public: true
 
+
+
     app.admin.order_statistic:
            class: AppBundle\Admin\OrderStatisticAdmin
            arguments: [~, AppBundle\Entity\OrderStatistic, ~]
@@ -111,6 +113,9 @@ services:
     app.admin.mining:
         class: AppBundle\Admin\MiningAdmin
         arguments: [~, AppBundle\Entity\Mining, ~]
+        calls:
+                 - [ setTemplate, [list, AppBundle:MiningAdmin:listMining.html.twig]]
+                 - [ setTemplate, [edit, AppBundle:MiningAdmin:editMining.html.twig]]
         tags:
               - { name: sonata.admin, manager_type: orm, group: 'Майнінг', label: 'Статистика по майнінгу' }
         public: true

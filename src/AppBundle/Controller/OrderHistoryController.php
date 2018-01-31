@@ -50,7 +50,6 @@ class OrderHistoryController extends Controller
 	 */
 	public function updateAction() {
 		try {
-			dump('111');
 			$em = $this->getDoctrine()->getManager();
 			$stockExchange = $em->getRepository('AppBundle:StockExchange')->findBy(['isActive' => true]);
 			foreach ($stockExchange as $exchange){
@@ -71,7 +70,6 @@ class OrderHistoryController extends Controller
 					}
 				}
 			}
-			dump('sss');
 			$updateOrderHistoryLiqui = $this->updateOrderHistoryLiqui();
 			if ($updateOrderHistoryLiqui === false) {
 				$this->isErrors = true;

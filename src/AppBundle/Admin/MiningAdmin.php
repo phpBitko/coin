@@ -31,29 +31,40 @@ class MiningAdmin extends AbstractAdmin
 					->orderBy('c.symbol', 'ASC');
 					},
 				'choice_label' => 'symbol',
-				'label'=>'Валюта')
-			)
+				'label'=>'Валюта'))
 			->add('startDate', 'sonata_type_date_picker', array('label' => 'Початок майнінгу', 'required' => false, 'format' => 'dd.MM.yyyy HH:m'))
 			->add('startBalance', null, array('label' => 'Початковий баланс'))
 			->add('endDate', 'sonata_type_date_picker', array('label' => 'Кінець майнінгу','required' => false, 'format' => 'dd.MM.yyyy HH:m'))
-			->add('endBalance', null, array('label' => 'Кінцевий баланс'));
+			->add('endBalance', null, array('label' => 'Кінцевий баланс'))
+			->add('idFarm','entity', array(
+					'class' => 'AppBundle:Farm',
+					'query_builder' => function (EntityRepository $er) {
+						return $er->createQueryBuilder('f')
+							->orderBy('f.name', 'ASC');
+					},
+					'choice_label' => 'name',
+					'label'=>'Ферма'))
+			->add('numCard', null, array('label' => 'Кількість карт'));
 
 		$formMapper->getFormBuilder()->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) use ($formMapper) {
 			$mining = $event->getForm()->getData();
-			if (!(empty($mining)) && !empty($mining->getStartBalance()) && !empty($mining->getEndBalance())) {
+			if (!(empty($mining)) && $mining->getStartBalance() !== null && $mining->getEndBalance()!== null && $mining->getStartDate() !== null && $mining->getEndDate()!== null) {
 				$mining->setDifferenceBalance($mining->getEndBalance() - $mining->getStartBalance());
 				$mining->setDifferenceDate(($mining->getEndDate()->getTimestamp() - $mining->getStartDate()->getTimestamp())/3600);
 				$cryptoCurrency = $this->getModelManager()->getEntityManager('AppBundle\Entity\CryptoCurrency');
 				$cryptoCoin = $cryptoCurrency->getRepository('AppBundle\Entity\CryptoCurrency')->findById($mining->getIdCurrency());
 				$mining->setDifferenceBalanceUsd($cryptoCoin[0]->getPriceUsd()*$mining->getDifferenceBalance());
 				$mining->setProfitUsdPerDay($mining->getDifferenceBalanceUsd()/($mining->getDifferenceDate()/24));
-
+				if($mining->getNumCard() !== null){
+					$mining->setProfitUsdPerDayOnCard($mining->getProfitUsdPerDay()/$mining->getNumCard());
+				}
 			}
 			$event->setData($mining);
 		});
-
-
-
+		$formMapper->getFormBuilder()->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($formMapper) {
+			$form = $event->getForm();
+			//dump($form);
+		});
 	}
 
 	protected function configureDatagridFilters(DatagridMapper $datagridMapper) {
@@ -72,6 +83,9 @@ class MiningAdmin extends AbstractAdmin
 			->add('differenceBalance', null, array('label' => 'Різниця, кріпта'))
 			->add('differenceBalanceUsd', null, array('label' => 'Різниця, $'))
 			->add('differenceDate', null, array('label' => 'Різниця, годин'))
-			->add('profitUsdPerDay', null, array('label' => 'Профіт за день, $'));
+			->add('profitUsdPerDay', null, array('label' => 'Профіт за день, $'))
+			->add('profitUsdPerDayOnCard', null, array('label' => 'Профіт за день по карті, $'))
+			->add('idFarm.name', null, array('label' => 'Ферма'))
+			->add('numCard', null, array('label' => 'Кількість карт'));
 	}
 }

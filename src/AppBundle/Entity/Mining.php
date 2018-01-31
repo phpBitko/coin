@@ -3,10 +3,9 @@ namespace AppBundle\Entity;
 
 use AppBundle\Service\Currency;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
-use Doctrine\DBAL\Types\Type;
+
 /**
-* Balances
+* Mining
 *
 * @ORM\Table(name="mining")
 * @ORM\Entity(repositoryClass="AppBundle\Repository\MiningRepository")
@@ -34,6 +33,14 @@ class Mining{
 	 * @ORM\JoinColumn(name="id_currency", referencedColumnName="id")
 	 */
 	private $idCurrency;
+
+	/**
+	 * @var int
+	 *
+	 * @ORM\ManyToOne(targetEntity="Farm", inversedBy="mining")
+	 * @ORM\JoinColumn(name="id_farm", referencedColumnName="id")
+	 */
+	private $idFarm;
 
 	/**
 	 * @var \DateTime
@@ -80,6 +87,15 @@ class Mining{
 	/**
 	 * @var float
 	 *
+	 * @ORM\Column(name="num_card", type="float", nullable=true)
+	 */
+	private $numCard;
+
+
+
+	/**
+	 * @var float
+	 *
 	 * @ORM\Column(name="difference_balance_usd", type="float", nullable=true)
 	 */
 	private $differenceBalanceUsd;
@@ -90,6 +106,14 @@ class Mining{
 	 * @ORM\Column(name="profit_usd_per_day", type="float", nullable=true)
 	 */
 	private $profitUsdPerDay;
+
+	/**
+	 * @var float
+	 *
+	 * @ORM\Column(name="profit_usd_per_day_on_card", type="float", nullable=true)
+	 */
+	private $profitUsdPerDayOnCard;
+
 
 	/**
 	 * @return int
@@ -117,6 +141,34 @@ class Mining{
 	 */
 	public function setIdCurrency(CryptoCurrency $idCurrency) {
 		$this->idCurrency = $idCurrency;
+	}
+
+	/**
+	 * @return Farm
+	 */
+	public function getIdFarm(){
+		return $this->idFarm;
+	}
+
+	/**
+	 * @param Farm $idFarm
+	 */
+	public function setIdFarm(Farm $idFarm) {
+		$this->idFarm = $idFarm;
+	}
+
+	/**
+	 * @return float
+	 */
+	public function getProfitUsdPerDayOnCard(){
+		return $this->profitUsdPerDayOnCard;
+	}
+
+	/**
+	 * @param float $profitUsdPerDayOnCard
+	 */
+	public function setProfitUsdPerDayOnCard(float $profitUsdPerDayOnCard) {
+		$this->profitUsdPerDayOnCard = $profitUsdPerDayOnCard;
 	}
 
 	/**
@@ -231,6 +283,19 @@ class Mining{
 		$this->profitUsdPerDay = $profitUsdPerDay;
 	}
 
+	/**
+	 * @return float
+	 */
+	public function getNumCard() {
+		return $this->numCard;
+	}
+
+	/**
+	 * @param float $numCard
+	 */
+	public function setNumCard(float $numCard) {
+		$this->numCard = $numCard;
+	}
 
 
 
