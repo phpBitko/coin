@@ -10,7 +10,9 @@
     <script src="{{ asset('build/app.js') }}"></script>
 
     <script type="text/javascript">
-        {{ chart(chart1)}}
+        {% for chart in charts %}
+            {{ chart(chart)}}
+        {% endfor %}
     </script>
 {% endblock %}
 {% block stylesheets %}
@@ -19,11 +21,8 @@
 {% endblock %}
 {% block content %}
     <div class="row">
-        {# {{ sonata_block_render({ 'type': 'admin.block.service.statistic_chart' }, {
-             'entity' : 'AppBundle:Statistic',
-             'repository_method' : 'findAll',
-             'title' : 'Statistic',
-         }) }}#}
     </div>
-    <div id="linechart_usd" style="min-width: 800px; height: 600px; margin-bottom: 20px"></div>
+    {% for chart in charts %}
+        <div id="{{ chart.chart.chart.renderTo }}" style="min-width: 800px; height: 600px; margin-bottom: 20px"></div>
+    {% endfor %}
 {% endblock %}

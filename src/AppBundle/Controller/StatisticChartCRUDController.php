@@ -16,7 +16,67 @@ class StatisticChartCRUDController extends Controller
 {
 	public function listAction() {
 		$em = $this->getDoctrine()->getManager();
-		$column = $em->getRepository('AppBundle:Statistic')->getColumn(array('priceUsd', 'priceBtc', 'addDate'));
+		$users = $em->getRepository('AppBundle:Users')->findAll();
+		$chart = array();
+		if(!empty($users)){
+			$i=1;
+			foreach ($users as $user){
+				$column = $em->getRepository('AppBundle:Statistic')->getColumn(array('priceUsd', 'priceBtc', 'addDate'), $user->getId());
+				$seriesUsd =
+					array(
+						'name' => 'Сума, USD',
+						//	'type'  => 'spline',
+						'color' => '#4572A7',
+						'yAxis' => 1,
+						'data' => $column['priceUsd']
+
+					);
+				$seriesBtc =
+					array(
+						'name' => 'Сума, BTC',
+						//	'type'  => 'spline',
+						'color' => '#AA4643',
+						'data' => $column['priceBtc']
+					);
+
+				$yData = array(
+					array(
+						'labels' => array(
+							'style'     => array('color' => '#AA4643')
+						),
+						'title' => array(
+							'text' => 'Сума, BTC',
+							'style' => array('color' => '#AA4643'),
+						),
+
+						'opposite' => true
+					),
+					array(
+						'labels' => array(
+							'style'     => array('color' => '#4572A7')
+						),
+
+						'title' => array(
+							'text' => 'Сума, $',
+							'style' => array('color' => '#4572A7'),
+						),
+					)
+				);
+				$obUsd = new Highchart();
+				$obUsd->chart->renderTo('linechart_usd_'.$user->getId());  // The #id of the div where to render the chart
+				$obUsd->title->text($user->getName());
+				$obUsd->xAxis->title(array('text' => 'Дата'));
+				$obUsd->xAxis->categories($column['addDate']);
+				$obUsd->yAxis($yData);
+				$obUsd->series(array($seriesUsd, $seriesBtc));
+				$chart['chart'.$i] = $obUsd;
+				$i++;
+			}
+		}
+
+
+
+	/*	$column = $em->getRepository('AppBundle:Statistic')->getColumn(array('priceUsd', 'priceBtc', 'addDate'));
 		$seriesUsd =
 			array(
 				'name' => 'Сума, USD',
@@ -63,7 +123,7 @@ class StatisticChartCRUDController extends Controller
 		$obUsd->xAxis->title(array('text' => 'Дата'));
 		$obUsd->xAxis->categories($column['addDate']);
 		$obUsd->yAxis($yData);
-		$obUsd->series(array($seriesUsd, $seriesBtc));
+		$obUsd->series(array($seriesUsd, $seriesBtc));*/
 		/*$seriesBtc = array(
 			array("name" => "Сума", "data" => $column['priceBtc']),
 		);
@@ -76,9 +136,7 @@ class StatisticChartCRUDController extends Controller
 
 		$obBtc->yAxis->title(array('text' => "Сума, BTC"));
 		$obBtc->series($seriesBtc);*/
-
-		return $this->render('AppBundle:StatisticAdmin:updateStatisticChart.html.twig', array(
-			'chart1' => $obUsd
-		));
+		dump($chart);
+		return $this->render('AppBundle:StatisticAdmin:updateStatisticChart.html.twig', array('charts' => $chart));
 	}
 }

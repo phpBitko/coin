@@ -13,14 +13,14 @@ use Symfony\Component\Validator\Constraints\DateTime;
  */
 class StatisticRepository extends \Doctrine\ORM\EntityRepository
 {
-	public function getColumn(array $columns) {
+	public function getColumn(array $columns, $idUser = 1) {
 		$alias = 's';
 		foreach ($columns as &$column){
 			$column = $alias.'.'.$column;
 		}
 		$qb = $this->createQueryBuilder('s')
 			->select(implode(', ',$columns))
-			->andWhere('s.idUsers = 1')
+			->andWhere('s.idUsers = :IDUSER')->setParameter('IDUSER', $idUser)
 			->getQuery()
 			->getResult();
 
