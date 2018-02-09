@@ -238,7 +238,12 @@ class BalancesController extends Controller
 			$statistic->setPriceUsdFarm2($usdBallanceFarm2);
 			$statistic->setPriceUsd($usdBallance);
 			$statistic->setPriceBtc($btcBallance);
-			$statistic->setProfit($usdBallance - $lastStatistic->getPriceUsd());
+			if(empty($lastStatistic)){
+				$statistic->setProfit($usdBallance);
+			}else{
+				$statistic->setProfit($usdBallance - $lastStatistic->getPriceUsd());
+			}
+
 			$statistic->setIdUsers($em->getRepository('AppBundle:Users')->find($idUser));
 			$em->persist($statistic);
 			$em->flush();
