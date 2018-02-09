@@ -22,55 +22,57 @@ class StatisticChartCRUDController extends Controller
 			$i=1;
 			foreach ($users as $user){
 				$column = $em->getRepository('AppBundle:Statistic')->getColumn(array('priceUsd', 'priceBtc', 'addDate'), $user->getId());
-				$seriesUsd =
-					array(
-						'name' => 'Сума, USD',
-						//	'type'  => 'spline',
-						'color' => '#4572A7',
-						'yAxis' => 1,
-						'data' => $column['priceUsd']
+				if(!empty($column)){
+					$seriesUsd =
+						array(
+							'name' => 'Сума, USD',
+							//	'type'  => 'spline',
+							'color' => '#4572A7',
+							'yAxis' => 1,
+							'data' => $column['priceUsd']
 
+						);
+					$seriesBtc =
+						array(
+							'name' => 'Сума, BTC',
+							//	'type'  => 'spline',
+							'color' => '#AA4643',
+							'data' => $column['priceBtc']
+						);
+
+					$yData = array(
+						array(
+							'labels' => array(
+								'style'     => array('color' => '#AA4643')
+							),
+							'title' => array(
+								'text' => 'Сума, BTC',
+								'style' => array('color' => '#AA4643'),
+							),
+
+							'opposite' => true
+						),
+						array(
+							'labels' => array(
+								'style'     => array('color' => '#4572A7')
+							),
+
+							'title' => array(
+								'text' => 'Сума, $',
+								'style' => array('color' => '#4572A7'),
+							),
+						)
 					);
-				$seriesBtc =
-					array(
-						'name' => 'Сума, BTC',
-						//	'type'  => 'spline',
-						'color' => '#AA4643',
-						'data' => $column['priceBtc']
-					);
-
-				$yData = array(
-					array(
-						'labels' => array(
-							'style'     => array('color' => '#AA4643')
-						),
-						'title' => array(
-							'text' => 'Сума, BTC',
-							'style' => array('color' => '#AA4643'),
-						),
-
-						'opposite' => true
-					),
-					array(
-						'labels' => array(
-							'style'     => array('color' => '#4572A7')
-						),
-
-						'title' => array(
-							'text' => 'Сума, $',
-							'style' => array('color' => '#4572A7'),
-						),
-					)
-				);
-				$obUsd = new Highchart();
-				$obUsd->chart->renderTo('linechart_usd_'.$user->getId());  // The #id of the div where to render the chart
-				$obUsd->title->text($user->getName());
-				$obUsd->xAxis->title(array('text' => 'Дата'));
-				$obUsd->xAxis->categories($column['addDate']);
-				$obUsd->yAxis($yData);
-				$obUsd->series(array($seriesUsd, $seriesBtc));
-				$chart['chart'.$i] = $obUsd;
-				$i++;
+					$obUsd = new Highchart();
+					$obUsd->chart->renderTo('linechart_usd_'.$user->getId());  // The #id of the div where to render the chart
+					$obUsd->title->text($user->getName());
+					$obUsd->xAxis->title(array('text' => 'Дата'));
+					$obUsd->xAxis->categories($column['addDate']);
+					$obUsd->yAxis($yData);
+					$obUsd->series(array($seriesUsd, $seriesBtc));
+					$chart['chart'.$i] = $obUsd;
+					$i++;
+				}
 			}
 		}
 
