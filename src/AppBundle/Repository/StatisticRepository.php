@@ -20,16 +20,14 @@ class StatisticRepository extends \Doctrine\ORM\EntityRepository
 		}
 		$qb = $this->createQueryBuilder('s')
 			->select(implode(', ',$columns))
+			->andWhere('s.idUsers = 1')
 			->getQuery()
 			->getResult();
 
 		$res = [];
 		foreach ($qb as $k =>$one){
 			foreach ($one as $k=>$v){
-
-				dump(is_a($v,'DateTime'));
 				if(is_a($v,'DateTime')){
-					dump($v);
 					$res[$k][] = $v->format('m.d.Y H:m');
 				}else{
 					$res[$k][] = $v;
