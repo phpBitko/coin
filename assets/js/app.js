@@ -22,6 +22,7 @@ $(document).ready(function () {
             success: function (data) {
                 waitingDialog.hide();
                 bootbox.alert(data.message);
+                location.reload();
             }
         });
     });

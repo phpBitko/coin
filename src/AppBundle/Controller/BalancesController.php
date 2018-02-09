@@ -120,12 +120,12 @@ class BalancesController extends Controller
 			$users = $em->getRepository('AppBundle:Users')->findAll();
 			if(!empty($users)){
 				foreach ($users as $user){
-					if(!$this->addStatistic($user->getId())){
+					if($this->addStatistic($user->getId()) === false){
 						throw new Exception(implode('! ', $this->errors));
 					}
 				}
 			}
-
+			$em->flush();
 //Отримуємо дані із Йобіт
 			/*$updateYobit = $this->updateYobit($activeBallances);
 			if ($updateYobit === false) {
@@ -211,6 +211,7 @@ class BalancesController extends Controller
 
 			return new JsonResponse(array('message' => $message), Response::HTTP_OK);
 		} catch (\Exception $exception) {
+
 			return new JsonResponse($exception->getMessage(), Response::HTTP_BAD_REQUEST);
 		}
 	}
@@ -246,12 +247,9 @@ class BalancesController extends Controller
 
 			$statistic->setIdUsers($em->getRepository('AppBundle:Users')->find($idUser));
 			$em->persist($statistic);
-			$em->flush();
-
 			return true;
 		} catch (Exception $exception) {
 			$this->errors[] = $exception->getMessage();
-
 			return false;
 		}
 	}
