@@ -20,9 +20,6 @@ class MiningAdmin extends AbstractAdmin
 	);
 
 	protected function configureFormFields(FormMapper $formMapper) {
-
-
-
 		$formMapper
 			->add('idCurrency','entity', array(
 				'class' => 'AppBundle:CryptoCurrency',
@@ -55,7 +52,7 @@ class MiningAdmin extends AbstractAdmin
 				$cryptoCoin = $cryptoCurrency->getRepository('AppBundle\Entity\CryptoCurrency')->findById($mining->getIdCurrency());
 				$mining->setDifferenceBalanceUsd($cryptoCoin[0]->getPriceUsd()*$mining->getDifferenceBalance());
 				$mining->setProfitUsdPerDay($mining->getDifferenceBalanceUsd()/($mining->getDifferenceDate()/24));
-				if($mining->getNumCard() !== null){
+				if(!empty($mining->getNumCard())){
 					$mining->setProfitUsdPerDayOnCard($mining->getProfitUsdPerDay()/$mining->getNumCard());
 				}
 			}

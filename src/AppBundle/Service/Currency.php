@@ -118,6 +118,7 @@ Class Currency
 
 	public function apiBalancesToObjectBalances($balances = array(),$activeBallances = array(), $stockExchange = '') {
 		try {
+
 			$em = $this->entityManager;
 			if (!empty($balances)) {
 				foreach ($balances as $k => $v) {
@@ -127,6 +128,7 @@ Class Currency
 						$balance->setStockExchange(ucfirst($stockExchange));
 						$balance->setCurrency($k);
 						$balance->setBalance($v);
+						$balance->setIdUsers($em->getRepository('AppBundle:Users')->find(1));
 						$balance = $this->setFarms($activeBallances, $balance);
 						$balance = $this->addPrice($balance);
 						$balance = $this->setProfit($activeBallances, $balance);
@@ -544,6 +546,7 @@ Class Currency
 			$balances->setPriceBtc($cryptoCurrency->getPriceBtc() * $balances->getBalance());
 			$balances->setName($cryptoCurrency->getName());
 		}
+		//$balances->setIdUsers($em->getRepository('AppBundle:Users')->find(0));
 
 		return $balances;
 	}

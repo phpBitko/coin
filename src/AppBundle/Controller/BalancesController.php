@@ -117,9 +117,15 @@ class BalancesController extends Controller
 			}
 			$em->flush();
 
-			if(!$this->addStatistic()){
-				throw new Exception(implode('! ', $this->errors));
+			$users = $em->getRepository('AppBundle:Users')->findAll();
+			if(!empty($users)){
+				foreach ($users as $user){
+					if(!$this->addStatistic($user->getId())){
+						throw new Exception(implode('! ', $this->errors));
+					}
+				}
 			}
+
 //Отримуємо дані із Йобіт
 			/*$updateYobit = $this->updateYobit($activeBallances);
 			if ($updateYobit === false) {
@@ -205,7 +211,6 @@ class BalancesController extends Controller
 
 			return new JsonResponse(array('message' => $message), Response::HTTP_OK);
 		} catch (\Exception $exception) {
-			//dump($exception->getMessage());
 			return new JsonResponse($exception->getMessage(), Response::HTTP_BAD_REQUEST);
 		}
 	}
@@ -213,12 +218,12 @@ class BalancesController extends Controller
 	/**
 	 * @return bool
 	 */
-	private function addStatistic() {
+	private function addStatistic($idUser) {
 		try {
 			$statistic = new Statistic();
 			$em = $this->getDoctrine()->getManager();
-			$ballances = $em->getRepository('AppBundle:Balances')->findBy(array('isActive' => true));
-			$lastStatistic = $em->getRepository('AppBundle:Statistic')->findOneBy(array(), array('id' => 'DESC'));
+			$ballances = $em->getRepository('AppBundle:Balances')->findBy(array('isActive' => true, 'idUsers' => $idUser));
+			$lastStatistic = $em->getRepository('AppBundle:Statistic')->findOneBy(array('idUsers' => $idUser), array('id' => 'DESC'));
 			$usdBallanceFarm1 = 0;
 			$usdBallanceFarm2 = 0;
 			$usdBallance = 0;
@@ -234,6 +239,7 @@ class BalancesController extends Controller
 			$statistic->setPriceUsd($usdBallance);
 			$statistic->setPriceBtc($btcBallance);
 			$statistic->setProfit($usdBallance - $lastStatistic->getPriceUsd());
+			$statistic->setIdUsers($em->getRepository('AppBundle:Users')->find($idUser));
 			$em->persist($statistic);
 			$em->flush();
 
@@ -399,7 +405,7 @@ class BalancesController extends Controller
 		return true;
 	}
 
-	private function updateYobit($activeBallances = null) {
+	/*private function updateYobit($activeBallances = null) {
 		$apiKey = $this->getParameter('app_bundle.yobit_api_key');
 		$apiSecret = $this->getParameter('app_bundle.yobit_secret_key');
 		$yobitClient = new YobitClient($apiKey, $apiSecret);
@@ -435,7 +441,7 @@ class BalancesController extends Controller
 		}
 
 		return true;
-	}
+	}*/
 
 	private function setFarms($activeBallances, $balancesCurrent){
 		foreach ($activeBallances as $activeBallance){
@@ -449,7 +455,7 @@ class BalancesController extends Controller
 	}
 
 
-	private function updateLiqui($activeBallances = null) {
+	/*private function updateLiqui($activeBallances = null) {
 		$apiKey = $this->getParameter('app_bundle.liqui_api_key');
 		$apiSecret = $this->getParameter('app_bundle.liqui_secret_key');
 		$liquiClient = new Liqui($apiKey, $apiSecret);
@@ -478,9 +484,9 @@ class BalancesController extends Controller
 		}
 
 		return true;
-	}
+	}*/
 
-	private function updateExmo($activeBallances = null) {
+	/*private function updateExmo($activeBallances = null) {
 		try {
 			$apiKey = $this->getParameter('app_bundle.exmo_api_key');
 			$apiSecret = $this->getParameter('app_bundle.exmo_secret_key');
@@ -517,7 +523,7 @@ class BalancesController extends Controller
 			$this->errors[] = 'Баланс на Exmo не знайдено!'.$exception->getMessage();
 			return false;
 		}
-	}
+	}*/
 
 
 }

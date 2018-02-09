@@ -4,6 +4,7 @@ namespace AppBundle\Repository;
 
 
 use AppBundle\Entity\Balances;
+
 /**
  * BalanceRepository
  *
@@ -13,23 +14,46 @@ use AppBundle\Entity\Balances;
 class BalancesRepository extends \Doctrine\ORM\EntityRepository
 {
 	public function deleteAll() {
-		$em = $this->getEntityManager()
-			->createQuery('DELETE FROM AppBundle:Balances');
-		return $em->execute(); ;
+		$em = $this->getEntityManager()->createQuery('DELETE FROM AppBundle:Balances');
+
+		return $em->execute();;
 
 	}
 
-	public function getBalance() {
+	public function getBalance(array $filters = null) {
 
-		$qb = $this->createQueryBuilder('b')
-			->andWhere('b.isActive = true')
-			->select('SUM(b.priceBtc) as  priceBTC, SUM(b.priceUsd) as  priceUSD')
-			->getQuery()
-            ->getOneOrNullResult();
+		$qb = $this->createQueryBuilder('b');
+		$qb->select('SUM(b.priceBtc) as  priceBTC, SUM(b.priceUsd) as  priceUSD');
+		$qb->andWhere('b.isActive = true');
 
+		if (!empty($filters)) {
+			foreach ($filters as $k => $v) {
+				switch ($k) {
+				case 'stockExchange':
+					if (!empty($v['value'])) {
+						$qb->andWhere('b.stockExchange = :STOCKEXCHANGE')->setParameter(':STOCKEXCHANGE', $v['value']);
+					}
+					break;
+				case 'currency':
+					if (!empty($v['value'])) {
+						$qb->andWhere('b.currency = :CURRENCY')->setParameter(':CURRENCY', $v['value']);
+					}
+					break;
+				case 'idUsers':
+					if (!empty($v['value'])) {
+						$qb->andWhere('b.idUsers = :IDUSERS')->setParameter(':IDUSERS', $v['value']);
+					}
+					break;
+				}
+			}
+		}
+
+		if(!isset($filters['idUsers']) || (isset($filters['idUsers']) && empty($filters['idUsers']['value']))){
+			$qb->andWhere('b.idUsers = 1');
+		}
+
+		$qb = $qb->getQuery()->getOneOrNullResult();
 		return $qb;
-
-
 	}
 
 }

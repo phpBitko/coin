@@ -22,6 +22,9 @@ class Balances{
 	private $id;
 
 
+
+
+
 	public function __construct() {
 		$this->addDate = new \DateTime(	'now', new \DateTimeZone('Europe/Kiev'));
 
@@ -76,6 +79,29 @@ class Balances{
 	 * @ORM\Column(name="price_usd", type="float", nullable=true)
 	 */
 	private $priceUsd;
+
+	/**
+	 * @var int
+	 *
+	 * @ORM\ManyToOne(targetEntity="Users", inversedBy="balances")
+	 * @ORM\JoinColumn(name="id_users", referencedColumnName="id")
+	 */
+	private $idUsers;
+
+	/**
+	 * @return Users
+	 */
+	public function getIdUsers(){
+		return $this->idUsers;
+	}
+
+	/**
+	 * @param Users $idUsers
+	 */
+	public function setIdUsers(Users $idUsers) {
+		$this->idUsers = $idUsers;
+	}
+
 
 	/**
 	 * @var float

@@ -8,8 +8,7 @@ use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Form\FormMapper;
 use Sonata\AdminBundle\Route\RouteCollection;
 use Sonata\AdminBundle\Show\ShowMapper;
-
-
+use Doctrine\ORM\EntityRepository;
 
 class BalancesAdmin extends AbstractAdmin
 {
@@ -42,7 +41,15 @@ class BalancesAdmin extends AbstractAdmin
 		$formMapper->add('farm1', null, array('label' => 'Ферма №1, %'));
 		$formMapper->add('farm2', null, array('label' => 'Ферма №2, %'));
 		$formMapper->add('isActive', null, array('label' => 'Активність'));
-		$formMapper->add('myBalance', null, array('label' => 'Мій гаманець'));
+		$formMapper->add('myBalance', null, array('label' => 'Мій гаманець'))
+					->add('idUsers','entity', array(
+						'class' => 'AppBundle:Users',
+						'query_builder' => function (EntityRepository $er) {
+							return $er->createQueryBuilder('u')
+								->orderBy('u.name', 'DESC');
+						},
+						'choice_label' => 'name',
+						'label'=>'Користувач'));
 	}
 
 	protected function configureDatagridFilters(DatagridMapper $datagridMapper) {
@@ -80,6 +87,12 @@ class BalancesAdmin extends AbstractAdmin
 			'choices' => $exchangeChoices,
 			'expanded' => false,
 			'multiple' => false,
+		))->add('idUsers', null, array('label' => 'Користувач', 'show_filter' => true), 'entity', array(
+			'class' => 'AppBundle:Users',
+			'choice_label' => 'name',
+			'query_builder' => function (EntityRepository $er) {
+					return $er->createQueryBuilder('u')->orderBy('u.name', 'DESC');
+				}
 		));
 	}
 

@@ -56,6 +56,29 @@ class Statistic{
 	 */
 	private $profit;
 
+
+	/**
+	 * @var int
+	 *
+	 * @ORM\ManyToOne(targetEntity="Users", inversedBy="statistic")
+	 * @ORM\JoinColumn(name="id_users", referencedColumnName="id")
+	 */
+	private $idUsers;
+
+	/**
+	 * @return Users
+	 */
+	public function getIdUsers(){
+		return $this->idUsers;
+	}
+
+	/**
+	 * @param Users $idUsers
+	 */
+	public function setIdUsers(Users $idUsers) {
+		$this->idUsers = $idUsers;
+	}
+
 	/**
 	 * @return float
 	 */

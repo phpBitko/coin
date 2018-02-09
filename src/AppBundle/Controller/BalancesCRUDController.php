@@ -45,11 +45,20 @@ class BalancesCRUDController extends Controller
 
 		$datagrid = $this->admin->getDatagrid();
 		$em = $this->getDoctrine()->getManager();
-		$lastBalances =
-			$em->getRepository('AppBundle:Statistic')-> findOneBy(array(),array('id' => 'DESC'));
+		$filters = $this->admin->getFilterParameters();
+		if(isset($filters['idUsers']) && !empty($filters['idUsers']['value'])){
+			$lastBalances =
+				$em->getRepository('AppBundle:Statistic')-> findOneBy(array('idUsers'=>$filters['idUsers']['value']),array('id' => 'DESC'));
+		}else{
+			$lastBalances =
+				$em->getRepository('AppBundle:Statistic')-> findOneBy(array('idUsers'=>1),array('id' => 'DESC'));
+		}
+
+		$balances =
+			$em->getRepository('AppBundle:Balances')-> getBalance($filters);
 		$data = [];
-		$data['priceUsd'] = $lastBalances->getPriceUsd();
-		$data['priceBtc'] = $lastBalances->getPriceBtc();
+		$data['priceUsd'] = $balances['priceUSD'];
+		$data['priceBtc'] = $balances['priceBTC'];
 		$data['profit'] = $lastBalances->getProfit();
 		/*$orderHistoryes = $datagrid->getResults();
 		$data = [];
