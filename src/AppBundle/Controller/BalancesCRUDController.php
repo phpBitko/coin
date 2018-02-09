@@ -59,7 +59,10 @@ class BalancesCRUDController extends Controller
 		$data = [];
 		$data['priceUsd'] = $balances['priceUSD'];
 		$data['priceBtc'] = $balances['priceBTC'];
-		$data['profit'] = $lastBalances->getProfit();
+		if(!empty($lastBalances)){
+			$data['profit'] = $lastBalances->getProfit();
+		}
+
 		/*$orderHistoryes = $datagrid->getResults();
 		$data = [];
 		$data['price'] = 0;
