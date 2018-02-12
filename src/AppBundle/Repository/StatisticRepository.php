@@ -21,6 +21,7 @@ class StatisticRepository extends \Doctrine\ORM\EntityRepository
 		$qb = $this->createQueryBuilder('s')
 			->select(implode(', ',$columns))
 			->andWhere('s.idUsers = :IDUSER')->setParameter('IDUSER', $idUser)
+			->orderBy('s.addDate', 'ASC')
 			->getQuery()
 			->getResult();
 
@@ -28,7 +29,7 @@ class StatisticRepository extends \Doctrine\ORM\EntityRepository
 		foreach ($qb as $k =>$one){
 			foreach ($one as $k=>$v){
 				if(is_a($v,'DateTime')){
-					$res[$k][] = $v->format('m.d.Y H:m');
+					$res[$k][] = $v->format('d.m.Y H:m');
 				}else{
 					$res[$k][] = $v;
 				}
