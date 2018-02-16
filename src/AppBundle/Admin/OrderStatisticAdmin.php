@@ -66,9 +66,9 @@ class OrderStatisticAdmin extends AbstractAdmin
 	protected function configureListFields(ListMapper $listMapper) {
 		$listMapper->add('exchange', null, array('label' => 'Назва пари'))
 			->add('stockExchange', null, array('label' => 'Назва біржі'))
-			->add('sumCrypto', null, array('label' => 'Сума торгів, кріпта','collapse' => array()))
-			->add('sumUsd', null, array('label' => 'Сума торгів, $','collapse' => array()))
-			->add('leftUsd', null, array('label' => 'Залишилось, $'))
+			->add('sumCrypto', null, array('label' => 'Сума торгів, кріпта','collapse' => array(),))
+			->add('sumUsd', null, array('label' => 'Сума торгів, $','collapse' => array(),'template'=>'AppBundle:OrderStatisticAdmin:customSumUsdListField.html.twig'))
+			->add('leftUsd', null, array('label' => 'Залишилось, $','template'=>'AppBundle:OrderStatisticAdmin:customLeftUsdListField.html.twig'))
 			->add('buyCount', null, array('label' => 'Куплено, кількість'))
 			->add('sellCount', null, array('label' => 'Продано, кількість'))
 			->add('leftCount', null, array('label' => 'Залишилось, кількість'));

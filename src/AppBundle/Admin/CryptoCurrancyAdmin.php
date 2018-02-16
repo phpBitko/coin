@@ -27,7 +27,7 @@ class CryptoCurrancyAdmin extends AbstractAdmin
 		$listMapper->addIdentifier('name', null, array('label' => 'Назва','header_style' => 'min-width:120px;', 'template'=>'AppBundle:CryptoCurrencyAdmin:customCurrencyListField.html.twig'))
 			->add('symbol', 'text', array('label' => 'Скорочена назва',/*'header_class' => 'customActions'*//*, 'label_icon' => 'fa fa-thumbs-o-up'/*,"header_class" =>"col-md-5" */))
 			->add('lastUpdated', null, array('label' => 'Дата оновлення', 'format' => 'd.m.Y H:i'))
-			->add('priceUsd', null, array('label' => 'Ціна, $','label_icon' => 'fa fa-usd'/* 'identifier'=>true)*/))
+			->add('priceUsd', null, array('label' => 'Ціна, $','label_icon' => 'fa fa-usd', 'template'=>'AppBundle:CryptoCurrencyAdmin:customPriceUsdListField.html.twig'/* 'identifier'=>true)*/))
 			->add('priceBtc', null, array('label' => 'Ціна, BTC', 'label_icon' => 'fa fa-btc'))
 			->add('percentChange1h', null, array('label' => 'Зміна ціни за 1 год.,%', 'collapse' => array()))
 			->add('percentChange24h', 'float', array('label' => 'Зміна ціни за 24 год., %','collapse' => array()))

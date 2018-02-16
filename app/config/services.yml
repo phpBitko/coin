@@ -38,7 +38,7 @@ services:
            class: AppBundle\Admin\CryptoCurrancyAdmin
            arguments: [~, AppBundle\Entity\CryptoCurrency, ~]
            calls:
-               - [ setTemplate, [list, AppBundle:CryptoCurrencyAdmin:updateCurrency.html.twig]]
+               - [ setTemplate, [list, AppBundle:CryptoCurrencyAdmin:listCryptoCurrency.html.twig]]
            tags:
                - { name: sonata.admin, manager_type: orm, group: 'Меню', label: 'Кріптовалюти' }
            public: true

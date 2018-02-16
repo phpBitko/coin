@@ -107,7 +107,7 @@ class BalancesAdmin extends AbstractAdmin
 			->add('farm1', null, array('label' => 'Ферма №1, %'))
 		    ->add('farm2', null, array('label' => 'Ферма №2, %'))
 			->add('addDate', null, array('label'=>'Дата оновлення', 'format' => 'd.m.Y H:i'))
-			->add('priceUsd', null, array('label'=>'Сума, $'))
+			->add('priceUsd', null, array('label'=>'Сума, $', 'template'=>'AppBundle:BalancesAdmin:customPriceUsdListField.html.twig'))
 			->add('priceBtc', null, array('label'=>'Сума, BTC'))
 			->add('profit', 'number', array('precision'=> 1, 'label'=>'Різниця з попереднім, $', 'collapse' => array()))
 			/*->add('_action', null, [

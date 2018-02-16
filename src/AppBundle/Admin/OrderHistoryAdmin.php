@@ -72,7 +72,7 @@ class OrderHistoryAdmin extends AbstractAdmin
 			->add('quantity', null, array('label' => 'Кількість'))->add('commission', null, array('label' => 'Комісія'))
 			->add('price', null, array('label' => 'Ціна'))
 			->add('pricePerUnit', null, array('label' => 'Ціна за одиницю'))
-			->add('priceUsd', null, array('label' => 'Ціна, $'))
+			->add('priceUsd', null, array('label' => 'Ціна, $', 'template'=>'AppBundle:OrderHistoryAdmin:customPriceUsdListField.html.twig'))
 			->add('priceUsdPerUnit', null, array('label' => 'Ціна за одиницю, $'));
 	}
 }
