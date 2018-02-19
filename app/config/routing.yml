@@ -17,3 +17,7 @@ _sonata_admin:
 
 fos_js_routing:
     resource: "@FOSJsRoutingBundle/Resources/config/routing/routing.xml"
+
+BoShurikTelegramBotBundle:
+    resource: "@BoShurikTelegramBotBundle/Resources/config/routing.yml"
+    prefix: /_telegram/451484836:AAFA_kx7gZFtsLfChPbdB23aL7QFIDi7dWg

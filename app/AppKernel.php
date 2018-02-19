@@ -23,6 +23,7 @@ class AppKernel extends Kernel
 	        new Knp\Bundle\MenuBundle\KnpMenuBundle(),
 	        new Sonata\AdminBundle\SonataAdminBundle(),
 	        new FOS\JsRoutingBundle\FOSJsRoutingBundle(),
+	        new BoShurik\TelegramBotBundle\BoShurikTelegramBotBundle,
         ];
 
         if (in_array($this->getEnvironment(), ['dev', 'test'], true)) {

@@ -79,3 +79,8 @@ sonata_block:
         sonata.admin.block.search_result:
             contexts: [admin]
         admin.block.service.statistic_chart: ~
+
+bo_shurik_telegram_bot:
+    api:
+        token: "451484836:AAFA_kx7gZFtsLfChPbdB23aL7QFIDi7dWg"
+    name: "myCoinBot"

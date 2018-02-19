@@ -15,7 +15,8 @@
     },
     "require": {
         "php": ">=5.5.9",
-        "ccxt/ccxt": "^1.10",
+        "boshurik/telegram-bot-bundle": "^2.3",
+        "ccxt/ccxt": "1.10.631",
         "doctrine/doctrine-bundle": "^1.6",
         "doctrine/orm": "^2.5",
         "friendsofsymfony/jsrouting-bundle": "^1.6",

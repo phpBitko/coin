@@ -115,17 +115,21 @@ class BalancesController extends Controller
 					$em->persist($myBallance);
 				}
 			}
-			$em->flush();
+			//$em->flush();
 
 			$users = $em->getRepository('AppBundle:Users')->findAll();
+			$statistics = array();
 			if(!empty($users)){
 				foreach ($users as $user){
-					if($this->addStatistic($user->getId()) === false){
+					$statistic = $this->addStatistic($user->getId());
+					if($statistic === false){
 						throw new Exception(implode('! ', $this->errors));
+					}else{
+						array_push($statistics, $statistic);
 					}
 				}
 			}
-			$em->flush();
+
 //Отримуємо дані із Йобіт
 			/*$updateYobit = $this->updateYobit($activeBallances);
 			if ($updateYobit === false) {
@@ -207,6 +211,17 @@ class BalancesController extends Controller
 				$message = implode('', $this->errors);
 			} else {
 				$message = 'Дані успішно оновлені!';
+				if(!empty($statistics)){
+					$messageTelegram = '';
+					foreach ($statistics as $statistic){
+						$messageTelegram .= $statistic->getIdUsers()->getName().', ';
+						$messageTelegram .= round($statistic->getPriceUsd(),2).', ';
+						$messageTelegram .= round($statistic->getProfit(),2).'; ';
+					}
+				}
+				$api = $this->container->get('bo_shurik_telegram_bot.api');
+				//Відправляємо повідомлення в телеграм.
+				$api->sendMessage(-219957870,$messageTelegram);
 			}
 
 			return new JsonResponse(array('message' => $message), Response::HTTP_OK);
@@ -215,6 +230,7 @@ class BalancesController extends Controller
 			return new JsonResponse($exception->getMessage(), Response::HTTP_BAD_REQUEST);
 		}
 	}
+
 
 	/**
 	 * @return bool
@@ -244,10 +260,9 @@ class BalancesController extends Controller
 			}else{
 				$statistic->setProfit($usdBallance - $lastStatistic->getPriceUsd());
 			}
-
 			$statistic->setIdUsers($em->getRepository('AppBundle:Users')->find($idUser));
 			$em->persist($statistic);
-			return true;
+			return $statistic;
 		} catch (Exception $exception) {
 			$this->errors[] = $exception->getMessage();
 			return false;
