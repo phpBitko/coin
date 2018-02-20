@@ -166,8 +166,8 @@ Class Currency
 			foreach ($activeBallances as $ballOne){
 				if($ballOne->getCurrency() == $balancesCurrent->getCurrency() && $ballOne->getStockExchange() == $balancesCurrent->getStockExchange()){
 
-					dump($balancesCurrent->getPriceUsd() );
-					dump( $ballOne->getPriceUsd());
+					//dump($balancesCurrent->getPriceUsd() );
+					//dump( $ballOne->getPriceUsd());
 					$balancesCurrent->setProfit($balancesCurrent->getPriceUsd() - $ballOne->getPriceUsd());
 					return $balancesCurrent;
 				}

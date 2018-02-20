@@ -212,16 +212,37 @@ class BalancesController extends Controller
 			} else {
 				$message = 'Дані успішно оновлені!';
 				if(!empty($statistics)){
-					$messageTelegram = '';
+					$api = $this->container->get('bo_shurik_telegram_bot.api');
+
 					foreach ($statistics as $statistic){
-						$messageTelegram .= $statistic->getIdUsers()->getName().', ';
-						$messageTelegram .= round($statistic->getPriceUsd(),2).', ';
-						$messageTelegram .= round($statistic->getProfit(),2).'; ';
+						$messageTelegram = '';
+						switch ($statistic->getIdUsers()->getId()){
+						case (2):
+							$idChat = 546508533;
+							$messageTelegram .= "Всього: ". round($statistic->getPriceUsd(),2)."$ \n";
+							$messageTelegram .= "Профіт: ". round($statistic->getProfit(),2)."$";
+							break;
+						case (3):
+							$idChat = 378405364;
+							$messageTelegram .= "Загальний: ". round($statistics[0]->getPriceUsd(),2)."$, ".round($statistics[0]->getPriceBtc(),2)."BTC \n";
+							$messageTelegram .= "Профіт: ". round($statistics[0]->getProfit(),2)."$ \n";
+							$messageTelegram .= "Мій: ". round($statistic->getPriceUsd(),2)."$, ".round($statistic->getPriceBtc(),2)."BTC \n";
+							$messageTelegram .= "Профіт: ". round($statistic->getProfit(),2)."$";
+							break;
+						case (4):
+							$idChat = 375052531;
+							$messageTelegram .= "Загальний: ". round($statistics[0]->getPriceUsd(),2)."$, ".round($statistics[0]->getPriceBtc(),2)."BTC \n";
+							$messageTelegram .= "Профіт: ". round($statistics[0]->getProfit(),2)."$ \n";
+							$messageTelegram .= "Мій: ". round($statistic->getPriceUsd(),2)."$, ".round($statistic->getPriceBtc(),2)."BTC \n";
+							$messageTelegram .= "Профіт: ". round($statistic->getProfit(),2)."$";
+							break;
+						}
+						if(isset($idChat)){
+							$api->sendMessage($idChat,$messageTelegram);
+						}
+
 					}
 				}
-				$api = $this->container->get('bo_shurik_telegram_bot.api');
-				//Відправляємо повідомлення в телеграм.
-				$api->sendMessage(-219957870,$messageTelegram);
 			}
 
 			return new JsonResponse(array('message' => $message), Response::HTTP_OK);

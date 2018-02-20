@@ -76,8 +76,6 @@ class StatisticChartCRUDController extends Controller
 			}
 		}
 
-
-
 	/*	$column = $em->getRepository('AppBundle:Statistic')->getColumn(array('priceUsd', 'priceBtc', 'addDate'));
 		$seriesUsd =
 			array(
@@ -138,7 +136,7 @@ class StatisticChartCRUDController extends Controller
 
 		$obBtc->yAxis->title(array('text' => "Сума, BTC"));
 		$obBtc->series($seriesBtc);*/
-		dump($chart);
+		//dump($chart);
 		return $this->render('AppBundle:StatisticAdmin:updateStatisticChart.html.twig', array('charts' => $chart));
 	}
 }
