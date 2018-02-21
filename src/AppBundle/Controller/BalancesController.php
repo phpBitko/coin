@@ -115,8 +115,7 @@ class BalancesController extends Controller
 					$em->persist($myBallance);
 				}
 			}
-			//$em->flush();
-
+			$em->flush();
 			$users = $em->getRepository('AppBundle:Users')->findAll();
 			$statistics = array();
 			if(!empty($users)){
@@ -210,11 +209,10 @@ class BalancesController extends Controller
 			if ($this->isErrors === true) {
 				$message = implode('', $this->errors);
 			} else {
-				$message = 'Дані успішно оновлені!';
 				$em->flush();
+				$message = 'Дані успішно оновлені!';
 				if(!empty($statistics)){
 					$api = $this->container->get('bo_shurik_telegram_bot.api');
-
 					foreach ($statistics as $statistic){
 						$messageTelegram = '';
 						switch ($statistic->getIdUsers()->getId()){
