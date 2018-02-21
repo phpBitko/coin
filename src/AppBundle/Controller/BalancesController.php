@@ -211,6 +211,7 @@ class BalancesController extends Controller
 				$message = implode('', $this->errors);
 			} else {
 				$message = 'Дані успішно оновлені!';
+				$em->flush();
 				if(!empty($statistics)){
 					$api = $this->container->get('bo_shurik_telegram_bot.api');
 
