@@ -128,7 +128,7 @@ Class Currency
 						$balance->setStockExchange(ucfirst($stockExchange));
 						$balance->setCurrency($k);
 						$balance->setBalance($v);
-						$balance->setIdUsers($em->getRepository('AppBundle:Users')->find(1));
+						$balance->setIdUsers($em->getRepository('ApplicationSonataUserBundle:User')->find(1));
 						$balance = $this->setFarms($activeBallances, $balance);
 						$balance = $this->addPrice($balance);
 						$balance = $this->setProfit($activeBallances, $balance);

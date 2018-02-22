@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Application\Sonata\UserBundle\Entity\User as User;
 
 /**
  * Balances
@@ -20,10 +21,6 @@ class Balances{
 	 * @ORM\GeneratedValue(strategy="AUTO")
 	 */
 	private $id;
-
-
-
-
 
 	public function __construct() {
 		$this->addDate = new \DateTime(	'now', new \DateTimeZone('Europe/Kiev'));
@@ -81,24 +78,24 @@ class Balances{
 	private $priceUsd;
 
 	/**
-	 * @var int
+	 * @var User
 	 *
-	 * @ORM\ManyToOne(targetEntity="Users", inversedBy="balances")
+	 * @ORM\ManyToOne(targetEntity="Application\Sonata\UserBundle\Entity\User")
 	 * @ORM\JoinColumn(name="id_users", referencedColumnName="id")
 	 */
 	private $idUsers;
 
 	/**
-	 * @return Users
+	 * @return User
 	 */
 	public function getIdUsers(){
 		return $this->idUsers;
 	}
 
 	/**
-	 * @param Users $idUsers
+	 * @param User $idUsers
 	 */
-	public function setIdUsers(Users $idUsers) {
+	public function setIdUsers(User $idUsers) {
 		$this->idUsers = $idUsers;
 	}
 

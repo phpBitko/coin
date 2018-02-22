@@ -28,7 +28,6 @@ use ccxt\hitbtc2;
 use ccxt\liqui;
 use ccxt\Exchange;
 use ccxt\cryptopia;
-
 use AppBundle\Service\ExmoClient;
 use Symfony\Component\Security\Acl\Exception\Exception;
 
@@ -63,7 +62,6 @@ class BalancesController extends Controller
 				$em->persist($v);
 			}
 			$stockExchange = $em->getRepository('AppBundle:StockExchange')->findBy(['isActive' => true]);
-
 			$currency = $this->get('app.service.currency');
 			foreach ($stockExchange as $exchange){
 				$apiKey = $this->getParameter('app_bundle.'.lcfirst($exchange->getName()).'_api_key');
@@ -91,21 +89,18 @@ class BalancesController extends Controller
 					$exchangeClass = new liqui(array('apiKey'=>$apiKey, 'secret'=>$apiSecret));
 					break;
 				}
-				//dump('111');
+
 				if(!isset($exchangeClass)){
 					throw new Exception("Біржа ".$exchange->getName()." не знайдена!");
 				}
 				$balance = $exchangeClass->fetch_total_balance();
-				//dump($balance);
-				//exit;
+
 				$balanceEntities = $currency->apiBalancesToObjectBalances($balance, $activeBallances, $exchange->getName());
 
 				if(!$balanceEntities){
 					throw new Exception($currency->getErrors());
 				}
-
 			}
-
 			$myBallances = $em->getRepository('AppBundle:Balances')->findBy(array('myBalance' => true));
 
 			if(!empty($myBallances)){
@@ -116,14 +111,14 @@ class BalancesController extends Controller
 				}
 			}
 			$em->flush();
-			$users = $em->getRepository('AppBundle:Users')->findAll();
+			$users = $em->getRepository('ApplicationSonataUserBundle:User')->findAll();
 			$statistics = array();
 			if(!empty($users)){
 				foreach ($users as $user){
 					$statistic = $this->addStatistic($user->getId());
 					if($statistic === false){
 						throw new Exception(implode('! ', $this->errors));
-					}else{
+					}elseif($statistic !== true){
 						array_push($statistics, $statistic);
 					}
 				}
@@ -209,6 +204,7 @@ class BalancesController extends Controller
 			if ($this->isErrors === true) {
 				$message = implode('', $this->errors);
 			} else {
+
 				$em->flush();
 				$message = 'Дані успішно оновлені!';
 				if(!empty($statistics)){
@@ -239,15 +235,13 @@ class BalancesController extends Controller
 						if(isset($idChat)){
 							$api->sendMessage($idChat,$messageTelegram);
 						}
-
 					}
 				}
 			}
 
 			return new JsonResponse(array('message' => $message), Response::HTTP_OK);
 		} catch (\Exception $exception) {
-
-			return new JsonResponse($exception->getMessage(), Response::HTTP_BAD_REQUEST);
+			return new JsonResponse(array('error' => $exception->getMessage()), Response::HTTP_BAD_REQUEST);
 		}
 	}
 
@@ -260,6 +254,9 @@ class BalancesController extends Controller
 			$statistic = new Statistic();
 			$em = $this->getDoctrine()->getManager();
 			$ballances = $em->getRepository('AppBundle:Balances')->findBy(array('isActive' => true, 'idUsers' => $idUser));
+			if(empty($ballances)){
+				return true;
+			}
 			$lastStatistic = $em->getRepository('AppBundle:Statistic')->findOneBy(array('idUsers' => $idUser), array('id' => 'DESC'));
 			$usdBallanceFarm1 = 0;
 			$usdBallanceFarm2 = 0;
@@ -280,7 +277,7 @@ class BalancesController extends Controller
 			}else{
 				$statistic->setProfit($usdBallance - $lastStatistic->getPriceUsd());
 			}
-			$statistic->setIdUsers($em->getRepository('AppBundle:Users')->find($idUser));
+			$statistic->setIdUsers($em->getRepository('ApplicationSonataUserBundle:User')->find($idUser));
 			$em->persist($statistic);
 			return $statistic;
 		} catch (Exception $exception) {

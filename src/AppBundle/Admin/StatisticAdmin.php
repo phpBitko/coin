@@ -16,6 +16,21 @@ class StatisticAdmin extends AbstractAdmin
 		'_sort_by' => 'addDate' // field name
 	);
 
+	public function createQuery($context = 'list')
+	{
+		$user = $this->getConfigurationPool()->getContainer()->get('security.token_storage')->getToken()->getUser();
+		$role = $user->getRoles();
+		$role = $role[0];
+		$query = parent::createQuery($context);
+		$rootAlias = $query->getRootAliases()[0];
+		//Якщо не супер адмін, то показуємо тільки дані авторизованого користувача.
+		if($role != 'ROLE_SUPER_ADMIN'){
+			$query->andWhere($query->expr()->eq($rootAlias . '.idUsers', ':IDUSERS'))
+				->setParameter('IDUSERS', $user->getId());
+		}
+		return $query;
+	}
+
 	protected function configureFormFields(FormMapper $formMapper) {
 	/*	$formMapper->add('name', 'text', array('label' => 'Назва'))
 			->add('symbol', 'text', array('label' => 'Скорочена назва'))
@@ -25,10 +40,19 @@ class StatisticAdmin extends AbstractAdmin
 	protected function configureDatagridFilters(DatagridMapper $datagridMapper) {
 
 		$datagridMapper->add('idUsers', null, array('label' => 'Користувач', 'show_filter' => true), 'entity', array(
-			'class' => 'AppBundle:Users',
-			'choice_label' => 'name',
+			'class' => 'ApplicationSonataUserBundle:User',
+			'choice_label' => 'username',
 			'query_builder' => function (EntityRepository $er) {
-				return $er->createQueryBuilder('u')->orderBy('u.name', 'DESC');
+				$user =
+					$this->getConfigurationPool()->getContainer()->get('security.token_storage')->getToken()->getUser();
+				$role = $user->getRoles();
+				$role = $role[0];
+				$query = $er->createQueryBuilder('u');
+				if ($role != 'ROLE_SUPER_ADMIN') {
+					$query->andwhere('u.id = '.$user->getId());
+				}
+				$query->orderBy('u.username', 'DESC');
+				return $query;
 			}
 		));
 	}

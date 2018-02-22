@@ -16,7 +16,12 @@ class StatisticChartCRUDController extends Controller
 {
 	public function listAction() {
 		$em = $this->getDoctrine()->getManager();
-		$users = $em->getRepository('AppBundle:Users')->findAll();
+
+		if($this->isGranted('ROLE_ADMIN')){
+			$users = $em->getRepository('ApplicationSonataUserBundle:User')->findBy(array(), array('id'=>'ASC'));
+		}else{
+			$users = $em->getRepository('ApplicationSonataUserBundle:User')->findBy(array('id'=>$this->getUser()->getId()), array('id'=>'ASC'));
+		}
 		$chart = array();
 		if(!empty($users)){
 			$i=1;
@@ -65,7 +70,7 @@ class StatisticChartCRUDController extends Controller
 					);
 					$obUsd = new Highchart();
 					$obUsd->chart->renderTo('linechart_usd_'.$user->getId());  // The #id of the div where to render the chart
-					$obUsd->title->text($user->getName());
+					$obUsd->title->text($user->getUsername());
 					$obUsd->xAxis->title(array('text' => 'Дата'));
 					$obUsd->xAxis->categories($column['addDate']);
 					$obUsd->yAxis($yData);

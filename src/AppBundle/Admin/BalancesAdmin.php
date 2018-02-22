@@ -9,6 +9,7 @@ use Sonata\AdminBundle\Form\FormMapper;
 use Sonata\AdminBundle\Route\RouteCollection;
 use Sonata\AdminBundle\Show\ShowMapper;
 use Doctrine\ORM\EntityRepository;
+use Application\Sonata\UserBundle\Entity\User as User;
 
 class BalancesAdmin extends AbstractAdmin
 {
@@ -21,11 +22,18 @@ class BalancesAdmin extends AbstractAdmin
 
 	public function createQuery($context = 'list')
 	{
+		$user = $this->getConfigurationPool()->getContainer()->get('security.token_storage')->getToken()->getUser();
+		$role = $user->getRoles();
+		$role = $role[0];
 		$query = parent::createQuery($context);
 		$rootAlias = $query->getRootAliases()[0];
-		$query
-			->andWhere($query->expr()->eq($rootAlias . '.isActive', ':IsActive'))
-			->setParameter('IsActive', true);
+		$query->andWhere($query->expr()->eq($rootAlias . '.isActive', ':ISACTIVE'))
+			->setParameter('ISACTIVE', true);
+		//Якщо не супер адмін, то показуємо тільки дані авторизованого користувача.
+		if($role != 'ROLE_SUPER_ADMIN'){
+			$query->andWhere($query->expr()->eq($rootAlias . '.idUsers', ':IDUSERS'))
+				->setParameter('IDUSERS', $user->getId());
+		}
 		return $query;
 	}
 
@@ -43,25 +51,50 @@ class BalancesAdmin extends AbstractAdmin
 		$formMapper->add('isActive', null, array('label' => 'Активність'));
 		$formMapper->add('myBalance', null, array('label' => 'Мій гаманець'))
 					->add('idUsers','entity', array(
-						'class' => 'AppBundle:Users',
+						'class' => 'ApplicationSonataUserBundle:User',
 						'query_builder' => function (EntityRepository $er) {
 							return $er->createQueryBuilder('u')
-								->orderBy('u.name', 'DESC');
+								->orderBy('u.username', 'DESC');
 						},
-						'choice_label' => 'name',
+						'choice_label' => 'username',
 						'label'=>'Користувач'));
 	}
 
 	protected function configureDatagridFilters(DatagridMapper $datagridMapper) {
+		$user = $this->getConfigurationPool()->getContainer()->get('security.token_storage')->getToken()->getUser();
+		$role = $user->getRoles();
+		$role = $role[0];
+
 		$em = $this->getModelManager()->getEntityManager('AppBundle\Entity\Balances');
 		$stockExchangeResult =
-			$em->createQueryBuilder('b')->select('b.stockExchange')->from('AppBundle\Entity\Balances', 'b')->where('b.isActive = true')
-				->groupBy('b.stockExchange')->orderBy('b.stockExchange', 'ASC')->getQuery()->getResult();
+			$em->createQueryBuilder('b')
+				->select('b.stockExchange')
+				->from('AppBundle\Entity\Balances', 'b')
+				->where('b.isActive = true')
+				->groupBy('b.stockExchange')
+				->orderBy('b.stockExchange', 'ASC')
+				->getQuery()
+				->getResult();
 		$stockExchangeChoices = array();
 		foreach ($stockExchangeResult as $stockExchangeRow) {
 			$stockExchangeChoices[$stockExchangeRow['stockExchange']] = $stockExchangeRow['stockExchange'];
 		}
 
+		//$em = $this->getModelManager()->getEntityManager('Application\Sonata\UserBundle\Entity\User');
+		$users = $em->createQueryBuilder('u')
+			->select('u.username, u.id')
+			->from('Application\Sonata\UserBundle\Entity\User', 'u')
+			->where('u.enabled = true');
+		if($role != 'ROLE_SUPER_ADMIN'){
+			$users->andWhere('u.id = :ID_USER')
+				->setParameter('ID_USER', $user->getId());
+		}
+
+		$users = $users->getQuery()->getArrayResult();
+		$usersChoices = array();
+		foreach ($users as $user) {
+			$usersChoices[$user['username']] = $user['id'];
+		}
 		$exchangeResult =
 			$em->createQueryBuilder('b')
 				->select('b.currency')
@@ -87,12 +120,10 @@ class BalancesAdmin extends AbstractAdmin
 			'choices' => $exchangeChoices,
 			'expanded' => false,
 			'multiple' => false,
-		))->add('idUsers', null, array('label' => 'Користувач', 'show_filter' => true), 'entity', array(
-			'class' => 'AppBundle:Users',
-			'choice_label' => 'name',
-			'query_builder' => function (EntityRepository $er) {
-					return $er->createQueryBuilder('u')->orderBy('u.name', 'DESC');
-				}
+		))->add('idUsers', 'doctrine_orm_choice', array('label' => 'Користувач', 'show_filter' => true), 'choice', array(
+			'choices' => $usersChoices,
+			'expanded' => false,
+			'multiple' => false,
 		));
 	}
 

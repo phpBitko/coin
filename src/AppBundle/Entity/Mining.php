@@ -29,7 +29,7 @@ class Mining{
 	/**
 	 * @var int
 	 *
-	 * @ORM\ManyToOne(targetEntity="CryptoCurrency", inversedBy="mining")
+	 * @ORM\ManyToOne(targetEntity="CryptoCurrency")
 	 * @ORM\JoinColumn(name="id_currency", referencedColumnName="id")
 	 */
 	private $idCurrency;
@@ -37,7 +37,7 @@ class Mining{
 	/**
 	 * @var int
 	 *
-	 * @ORM\ManyToOne(targetEntity="Farm", inversedBy="mining")
+	 * @ORM\ManyToOne(targetEntity="Farm")
 	 * @ORM\JoinColumn(name="id_farm", referencedColumnName="id")
 	 */
 	private $idFarm;

@@ -42,16 +42,23 @@ class BalancesCRUDController extends Controller
 		if ($listMode = $request->get('_list_mode')) {
 			$this->admin->setListMode($listMode);
 		}
-
 		$datagrid = $this->admin->getDatagrid();
 		$em = $this->getDoctrine()->getManager();
 		$filters = $this->admin->getFilterParameters();
-		if(isset($filters['idUsers']) && !empty($filters['idUsers']['value'])){
-			$lastBalances =
-				$em->getRepository('AppBundle:Statistic')-> findOneBy(array('idUsers'=>$filters['idUsers']['value']),array('id' => 'DESC'));
+		//Якщо адмін, працюють всі фільтри і по всім юзерам
+		if($this->isGranted('ROLE_ADMIN')){
+			if(isset($filters['idUsers']) && !empty($filters['idUsers']['value'])){
+				$lastBalances =
+					$em->getRepository('AppBundle:Statistic')-> findOneBy(array('idUsers'=>$filters['idUsers']['value']),array('id' => 'DESC'));
+			}else{
+				$lastBalances =
+					$em->getRepository('AppBundle:Statistic')-> findOneBy(array('idUsers'=>1),array('id' => 'DESC'));
+			}
 		}else{
+			//Для звичайних юзерів бачать статистику тільки по собі
 			$lastBalances =
-				$em->getRepository('AppBundle:Statistic')-> findOneBy(array('idUsers'=>1),array('id' => 'DESC'));
+				$em->getRepository('AppBundle:Statistic')-> findOneBy(array('idUsers'=>$this->getUser()->getId()),array('id' => 'DESC'));
+			$filters['idUsers']['value'] = $this->getUser()->getId();
 		}
 
 		$balances =

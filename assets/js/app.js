@@ -39,12 +39,16 @@ $(document).ready(function () {
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 waitingDialog.hide();
-                bootbox.alert(jqXHR.responseJSON);
+                if(jqXHR.responseJSON){
+                    bootbox.alert(jqXHR.responseJSON.error);
+                }else{
+                    bootbox.alert(jqXHR.responseText);
+                }
             },
             success: function (data) {
                 waitingDialog.hide();
                 bootbox.alert(data.message);
-                location.reload();
+             //   location.reload();
             }
         });
     })
