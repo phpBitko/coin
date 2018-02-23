@@ -226,14 +226,19 @@ class BalancesController extends Controller
 							break;
 						case (4):
 							$idChat = 375052531;
-							$messageTelegram .= "Загальний: ". round($statistics[0]->getPriceUsd(),2)."$, ".round($statistics[0]->getPriceBtc(),2)."BTC \n";
-							$messageTelegram .= "Профіт: ". round($statistics[0]->getProfit(),2)."$ \n";
+							foreach ($statistics as $statistic1){
+								if($statistic1->getIdUsers()->getId() == 1){
+									$messageTelegram .= "Загальний: ". round($statistic1->getPriceUsd(),2)."$, ".round($statistic1->getPriceBtc(),2)."BTC \n";
+									$messageTelegram .= "Профіт: ". round($statistic1->getProfit(),2)."$ \n";
+								}
+							}
 							$messageTelegram .= "Мій: ". round($statistic->getPriceUsd(),2)."$, ".round($statistic->getPriceBtc(),2)."BTC \n";
 							$messageTelegram .= "Профіт: ". round($statistic->getProfit(),2)."$";
 							break;
 						}
-						if(isset($idChat)){
+						if(!empty($idChat)){
 							$api->sendMessage($idChat,$messageTelegram);
+							unset($idChat);
 						}
 					}
 				}
