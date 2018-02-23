@@ -64,6 +64,6 @@ class StatisticAdmin extends AbstractAdmin
 			->add('priceUsdFarm2', null, array('label' => 'Сума на 2 фермі, $','template'=>'AppBundle:StatisticAdmin:customPriceUsdListField.html.twig'))
 			->add('addDate', 'date', array('label' => 'Дата оновлення', 'format' => 'd-m-Y H:i'))
 		    ->add('profit', null, array('label' => 'Профіт, $',  'collapse' => array()))
-			->add('idUsers.name', null, array('label' => 'Користувач'));
+			->add('idUsers.username', null, array('label' => 'Користувач'));
 	}
 }
