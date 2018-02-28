@@ -65,6 +65,9 @@ doctrine:
         auto_generate_proxy_classes: '%kernel.debug%'
        # naming_strategy: doctrine.orm.naming_strategy.underscore
        # auto_mapping: false
+        dql:
+               datetime_functions:
+                    date_trunc: AppBundle\DoctrineExtensions\DateTrunc
         mappings:
             AppBundle: ~
             SonataUserBundle: ~

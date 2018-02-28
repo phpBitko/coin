@@ -94,8 +94,34 @@ services:
                - { name: sonata.admin, manager_type: orm, group: 'Меню', label: 'Статистика по ордерам' }
            public: true
 
+
+    app.admin.deposit:
+              class: AppBundle\Admin\DepositAdmin
+              arguments: [~, AppBundle\Entity\Deposit, ~]
+              calls:
+                       - [ setTemplate, [list, AppBundle:DepositAdmin:listDeposit.html.twig]]
+              tags:
+                  - { name: sonata.admin, manager_type: orm, group: 'Майнінг', label: 'Депозити на рахунки' }
+              public: true
+
+    app.admin.deposit_statistic:
+                  class: AppBundle\Admin\DepositStatisticAdmin
+                  arguments: [~, AppBundle\Entity\DepositStatistic, ~]
+                  calls:
+                           - [ setTemplate, [list, AppBundle:DepositStatisticAdmin:listDepositStatistic.html.twig]]
+                  tags:
+                      - { name: sonata.admin, manager_type: orm, group: 'Майнінг', label: 'Статистика по дипозитам' }
+                  public: true
+
     app.service.currency:
            class:     AppBundle\Service\Currency
+           arguments:
+                - "@doctrine.orm.entity_manager"
+           public: true
+
+
+    app.service.deposit:
+           class:     AppBundle\Service\DepositServices
            arguments:
                 - "@doctrine.orm.entity_manager"
            public: true
