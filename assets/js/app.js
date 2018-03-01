@@ -106,6 +106,33 @@ $(document).ready(function () {
         });
     })
 
+    $('#update_deposit_month').on('click', function () {
+        $.ajax({
+            url: Routing.generate('update_deposit_month'),
+            method: 'POST',
+            dataType: 'json',
+            beforeSend: function (jqXHR) {
+                waitingDialog.show('Зачекайте, будь ласка');
+            },
+            complete: function (jqXHR, textStatus) {
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                waitingDialog.hide();
+                if(jqXHR.responseJSON){
+                    bootbox.alert(jqXHR.responseJSON.error);
+                }else{
+                    bootbox.alert(jqXHR.responseText);
+                }
+            },
+            success: function (data) {
+                waitingDialog.hide();
+                bootbox.alert(data.message);
+                //   location.reload();
+            }
+        });
+    })
+
+
     $('.sonata-readmore').each(function (obj) {
         if($(this).text() > 0){
             $(this).parent().addClass('label-success');

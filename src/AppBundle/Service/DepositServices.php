@@ -5,6 +5,7 @@ namespace AppBundle\Service;
 use AppBundle\Entity\CryptoCurrency;
 use AppBundle\Entity\Balances;
 use AppBundle\Entity\Deposit;
+use AppBundle\Entity\DepositMonth;
 use AppBundle\Entity\DepositStatistic;
 use AppBundle\Entity\OrderHistory;
 use AppBundle\Repository\cryptoCurrencyRepository;
@@ -53,11 +54,11 @@ class DepositServices
 			$cryptoCurrency =
 				$em->getRepository('AppBundle:CryptoCurrency')->findOneBy(array('symbol' => $deposit['currency']));
 			$depositStatistic = $em->getRepository('AppBundle:DepositStatistic')->findOneBy(array(
-						'fromIn' => $deposit['from_in'],
-						'idCryptoCurrency' => $cryptoCurrency->getId(),
-						'month' => $getDate = new \DateTime($deposit['month']),
-						'isActive' => true,
-					));
+				'fromIn' => $deposit['from_in'],
+				'idCryptoCurrency' => $cryptoCurrency->getId(),
+				'month' => $getDate = new \DateTime($deposit['month']),
+				'isActive' => true,
+			));
 
 			if (empty($depositStatistic)) {
 				$depositStatistic = new DepositStatistic();
@@ -78,6 +79,24 @@ class DepositServices
 			$em->persist($depositStatistic);
 		}
 
+		return true;
+
+	}
+
+	public function addDepositMonth(array $groupDepositMonth) {
+		$em = $this->entityManager;
+		foreach ($groupDepositMonth as $deposit) {
+			$depositMonth = new DepositMonth();
+			$depositMonth->setPriceUsdActual($deposit['price_usd_actual']);
+			$depositMonth->setPriceUsdPerm($deposit['price_usd_perm']);
+			$depositMonth->setFarm1Sum($deposit['farm1']);
+			$depositMonth->setFarm2Sum($deposit['farm2']);
+			$depositMonth->setFarm3Sum($deposit['farm3']);
+			$depositMonth->setIsActive(true);
+			//$month = new \DateTime($deposit['month']);
+			$depositMonth->setMonth($deposit['month']);
+			$em->persist($depositMonth);
+		}
 		return true;
 
 	}

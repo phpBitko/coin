@@ -11,5 +11,19 @@ use Doctrine\ORM\EntityRepository as Repository;
  */
 class DepositStatisticRepository extends Repository
 {
-
+	public function groupDepositStatistic(){
+		$qb = $this->createQueryBuilder('ds')
+			->select('ds.month',
+				'SUM(ds.priceUsdActual) AS price_usd_actual',
+				'SUM(ds.priceUsdPerm) AS price_usd_perm',
+				'SUM(ds.priceUsdPerm*ds.farm1/100) AS farm1',
+				'SUM(ds.priceUsdPerm*ds.farm2/100) AS farm2',
+				'SUM(ds.priceUsdPerm*ds.farm3/100) AS farm3')
+			->where('ds.isActive = true')
+			->groupBy('ds.month')
+			->getQuery()
+			->getResult();
+		dump($qb);
+		return $qb;
+	}
 }

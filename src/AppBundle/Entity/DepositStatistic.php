@@ -214,7 +214,7 @@ class DepositStatistic
 	/**
 	 * @param float $farm2
 	 */
-	public function setFarm2(float $farm2) {
+	public function setFarm2(?float $farm2) {
 		$this->farm2 = $farm2;
 	}
 

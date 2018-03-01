@@ -110,8 +110,17 @@ services:
                   calls:
                            - [ setTemplate, [list, AppBundle:DepositStatisticAdmin:listDepositStatistic.html.twig]]
                   tags:
-                      - { name: sonata.admin, manager_type: orm, group: 'Майнінг', label: 'Статистика по дипозитам' }
+                      - { name: sonata.admin, manager_type: orm, group: 'Майнінг', label: 'Статистика по депозитам' }
                   public: true
+
+    app.admin.deposit_month:
+                     class: AppBundle\Admin\DepositMonthAdmin
+                     arguments: [~, AppBundle\Entity\DepositMonth, ~]
+                     calls:
+                              - [ setTemplate, [list, AppBundle:DepositMonthAdmin:listDepositMonth.html.twig]]
+                     tags:
+                         - { name: sonata.admin, manager_type: orm, group: 'Майнінг', label: 'Депозит по місяцям' }
+                     public: true
 
     app.service.currency:
            class:     AppBundle\Service\Currency
