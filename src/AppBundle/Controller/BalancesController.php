@@ -6,7 +6,8 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Statistic;
 use AppBundle\Service\CryptopiaClient;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Symfony\Component\BrowserKit\Request;
+//use Symfony\Component\BrowserKit\Request;
+use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -49,7 +50,7 @@ class BalancesController extends Controller
 	 * @Method("POST")
 	 *
 	 */
-	public function updateAction() {
+	public function updateAction(Request $request) {
 		try {
 			$em = $this->getDoctrine()->getManager();
 			$activeBallances =
@@ -61,8 +62,18 @@ class BalancesController extends Controller
 				$v->setIsActive(false);
 				$em->persist($v);
 			}
-			$stockExchange = $em->getRepository('AppBundle:StockExchange')->findBy(['isActive' => true]);
+
+			if(empty($request->get('farm1')) || empty($request->get('farm2'))){
+				throw new \Exception('Помилка отримання даних з myetherapi');
+			}
 			$currency = $this->get('app.service.currency');
+
+			$myetherapi['farm1'] = $request->get('farm1');
+			$myetherapi['farm2'] = $request->get('farm2');
+
+			$currency->myetherapiToObjectBalances($myetherapi, $activeBallances);
+
+			$stockExchange = $em->getRepository('AppBundle:StockExchange')->findBy(['isActive' => true]);
 			foreach ($stockExchange as $exchange){
 				$apiKey = $this->getParameter('app_bundle.'.lcfirst($exchange->getName()).'_api_key');
 				$apiSecret = $this->getParameter('app_bundle.'.lcfirst($exchange->getName()).'_secret_key');
@@ -93,6 +104,8 @@ class BalancesController extends Controller
 				if(!isset($exchangeClass)){
 					throw new Exception("Біржа ".$exchange->getName()." не знайдена!");
 				}
+
+
 				$balance = $exchangeClass->fetch_total_balance();
 
 				$balanceEntities = $currency->apiBalancesToObjectBalances($balance, $activeBallances, $exchange->getName());

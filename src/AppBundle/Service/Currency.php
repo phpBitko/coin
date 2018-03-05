@@ -22,8 +22,42 @@ Class Currency
 		$this->entityManager = $entityManager;
 	}
 
+	public function myetherapiToObjectBalances(array $myetherapi, $activeBallances){
+		try{
+			$em = $this->entityManager;
+			$cryptoCurrency =$em->getRepository('AppBundle:CryptoCurrency')->findOneBy(array('symbol' => 'ETH'));
+			foreach ($myetherapi as $key => $value){
+				switch ($key){
+				case 'farm2':
+				case 'farm1':
+					$balances = new Balances();
+					$balances->setCurrency($cryptoCurrency->getSymbol());
+					$balances->setBalance($value);
+					$balances->setIsActive(true);
+					$balances = $this->addPrice($balances);
+					if($key == 'farm2'){
+						$balances->setStockExchange('Myetherwallet2');
+						$balances->setFarm2(100);
+						$balances->setFarm1(0);
+					}else{
+						$balances->setStockExchange('Myetherwallet1');
+					}
+					$balances = $this->setFarms($activeBallances, $balances);
+					$balances = $this->setProfit($activeBallances, $balances);
+					$balances->setIdUsers($em->getRepository('ApplicationSonataUserBundle:User')->find(1));
+					$em->persist($balances);
+					break;
+				}
+			}
+		}catch (\Exception $exception){
+			$this->errors = $exception->getMessage();
+			return false;
+		}
+	}
+
 	public function apiArrayToObject(array $data, CryptoCurrency $cryptoCurrency = null) {
 		try {
+
 			if ($cryptoCurrency === null) {
 				$cryptoCurrency = new CryptoCurrency();
 			}
@@ -165,9 +199,6 @@ Class Currency
 		if (!empty($activeBallances)) {
 			foreach ($activeBallances as $ballOne){
 				if($ballOne->getCurrency() == $balancesCurrent->getCurrency() && $ballOne->getStockExchange() == $balancesCurrent->getStockExchange()){
-
-					//dump($balancesCurrent->getPriceUsd() );
-					//dump( $ballOne->getPriceUsd());
 					$balancesCurrent->setProfit($balancesCurrent->getPriceUsd() - $ballOne->getPriceUsd());
 					return $balancesCurrent;
 				}
