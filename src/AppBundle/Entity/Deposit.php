@@ -211,14 +211,14 @@ class Deposit
 	/**
 	 * @return string
 	 */
-	public function getCryptoAddress(): string {
+	public function getCryptoAddress(): ?string {
 		return $this->cryptoAddress;
 	}
 
 	/**
 	 * @param string $cryptoAddress
 	 */
-	public function setCryptoAddress(string $cryptoAddress) {
+	public function setCryptoAddress(?string $cryptoAddress) {
 		$this->cryptoAddress = $cryptoAddress;
 	}
 

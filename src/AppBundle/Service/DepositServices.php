@@ -25,7 +25,7 @@ class DepositServices
 	public function addBittrexDeposit(array $deposits) {
 		$em = $this->entityManager;
 		foreach ($deposits as $deposit) {
-			$cryptoCurrency = $em->getRepository('AppBundle:Deposit')->findOneBy(array('idApi' => $deposit['Id']));
+			$cryptoCurrency = $em->getRepository('AppBundle:Deposit')->findOneBy(array('idApi' => $deposit['Id'], 'fromIn'=>'Bittrex'));
 			if (empty($cryptoCurrency)) {
 				$depositEntity = new Deposit();
 				$depositEntity->setFromIn('Bittrex');
@@ -39,7 +39,32 @@ class DepositServices
 				$depositEntity->setTxId($deposit['TxId']);
 				$depositEntity->setCryptoAddress($deposit['CryptoAddress']);
 				$getDate = new \DateTime($deposit['LastUpdated']);
-				$getDate->setTimezone(new \DateTimeZone('Europe/Kiev'));
+				$depositEntity->setGetDate($getDate);
+				$em->persist($depositEntity);
+			}
+		}
+
+		return true;
+	}
+
+
+	public function addCryptopiaDeposit(array $deposits) {
+		$em = $this->entityManager;
+		foreach ($deposits as $deposit) {
+			$cryptoCurrency = $em->getRepository('AppBundle:Deposit')->findOneBy(array('idApi' => $deposit['Id'], 'fromIn'=>'Cryptopia'));
+			if (empty($cryptoCurrency)) {
+				$depositEntity = new Deposit();
+				$depositEntity->setFromIn('Cryptopia');
+				$depositEntity->setIdApi($deposit['Id']);
+				$depositEntity->setCurrency($deposit['Currency']);
+				$cryptoCurrency =
+					$em->getRepository('AppBundle:CryptoCurrency')->findOneBy(array('symbol' => $deposit['Currency']));
+				$depositEntity->setCurrencyName($cryptoCurrency->getName());
+				$depositEntity->setAmount($deposit['Amount']);
+				$depositEntity->setConfirmations($deposit['Confirmations']);
+				$depositEntity->setTxId($deposit['TxId']);
+				$depositEntity->setCryptoAddress($deposit['Address']);
+				$getDate = new \DateTime($deposit['Timestamp']);
 				$depositEntity->setGetDate($getDate);
 				$em->persist($depositEntity);
 			}

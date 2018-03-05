@@ -66,12 +66,14 @@ class BalancesController extends Controller
 			if(empty($request->get('farm1')) || empty($request->get('farm2'))){
 				throw new \Exception('Помилка отримання даних з myetherapi');
 			}
-			$currency = $this->get('app.service.currency');
 
+			$currency = $this->get('app.service.currency');
+			//Записуєио дані з кошелька myetherapi
 			$myetherapi['farm1'] = $request->get('farm1');
 			$myetherapi['farm2'] = $request->get('farm2');
-
-			$currency->myetherapiToObjectBalances($myetherapi, $activeBallances);
+			if($currency->myetherapiToObjectBalances($myetherapi, $activeBallances) === false){
+				throw new Exception($currency->getErrors());
+			}
 
 			$stockExchange = $em->getRepository('AppBundle:StockExchange')->findBy(['isActive' => true]);
 			foreach ($stockExchange as $exchange){
@@ -105,11 +107,8 @@ class BalancesController extends Controller
 					throw new Exception("Біржа ".$exchange->getName()." не знайдена!");
 				}
 
-
 				$balance = $exchangeClass->fetch_total_balance();
-
 				$balanceEntities = $currency->apiBalancesToObjectBalances($balance, $activeBallances, $exchange->getName());
-
 				if(!$balanceEntities){
 					throw new Exception($currency->getErrors());
 				}
@@ -260,7 +259,6 @@ class BalancesController extends Controller
 					}
 				}
 			}
-
 			return new JsonResponse(array('message' => $message), Response::HTTP_OK);
 		} catch (\Exception $exception) {
 			return new JsonResponse(array('error' => $exception->getMessage()), Response::HTTP_BAD_REQUEST);
@@ -290,6 +288,7 @@ class BalancesController extends Controller
 				$usdBallance += $ballance->getPriceUsd();
 				$btcBallance += $ballance->getPriceBtc();
 			}
+
 			$statistic->setPriceUsdFarm1($usdBallanceFarm1);
 			$statistic->setPriceUsdFarm2($usdBallanceFarm2);
 			$statistic->setPriceUsd($usdBallance);
@@ -388,10 +387,8 @@ class BalancesController extends Controller
 			}
 		} else {
 			$this->errors[] = 'Баланс на Cryptopia не знайдено! '.$balanceCryptopia['message'];
-
 			return false;
 		}
-
 		return true;
 	}
 

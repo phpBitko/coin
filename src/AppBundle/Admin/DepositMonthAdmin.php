@@ -17,14 +17,14 @@ class DepositMonthAdmin extends AbstractAdmin
 	);
 
 
-	/*public function createQuery($context = 'list')
+	public function createQuery($context = 'list')
 	{
 		$query = parent::createQuery($context);
 		$rootAlias = $query->getRootAliases()[0];
-		$query->andWhere($query->expr()->eq($rootAlias . '.isActive', ':ISACTIVE'))
-			->setParameter('ISACTIVE', true);
+		$query->andWhere($query->expr()->eq($rootAlias . '.isActive', ':IsActive'))
+			->setParameter('IsActive', true);
 		return $query;
-	}*/
+	}
 
 
 	protected function configureFormFields(FormMapper $formMapper) {

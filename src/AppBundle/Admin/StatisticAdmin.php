@@ -60,8 +60,8 @@ class StatisticAdmin extends AbstractAdmin
 	protected function configureListFields(ListMapper $listMapper) {
 		$listMapper->addIdentifier('priceUsd', null, array('label' => 'Загальна сума, $', 'template'=>'AppBundle:StatisticAdmin:customPriceUsdListField.html.twig'))
 			->add('priceBtc', null, array('label' => 'Загальна сума, BTC'))
-			->add('priceUsdFarm1', null, array('label' => 'Сума на 1 фермі, $','template'=>'AppBundle:StatisticAdmin:customPriceUsdListField.html.twig'))
-			->add('priceUsdFarm2', null, array('label' => 'Сума на 2 фермі, $','template'=>'AppBundle:StatisticAdmin:customPriceUsdListField.html.twig'))
+			->add('priceUsdFarm1', null, array('label' => 'Сума на 1 фермі, $','template'=>'AppBundle:StatisticAdmin:customPriceUsdFarm1ListField.html.twig'))
+			->add('priceUsdFarm2', null, array('label' => 'Сума на 2 фермі, $','template'=>'AppBundle:StatisticAdmin:customPriceUsdFarm2ListField.html.twig'))
 			->add('addDate', 'date', array('label' => 'Дата оновлення', 'format' => 'd-m-Y H:i'))
 		    ->add('profit', null, array('label' => 'Профіт, $',  'collapse' => array()))
 			->add('idUsers.username', null, array('label' => 'Користувач'));
